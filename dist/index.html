@@ -1,0 +1,82 @@
+<html>
+
+<head>
+    <title>Particle sim</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body id="main_container">
+    <div id="background">
+        <canvas id='background-canvas'></canvas>
+        <canvas id='foreground-canvas'></canvas>
+    </div>
+    <div id="menu-button" open="false">
+        <div id="menu-back-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="back-arrow">
+                <path
+                    d="M13.83 19a1 1 0 0 1-.78-.37l-4.83-6a1 1 0 0 1 0-1.27l5-6a1 1 0 0 1 1.54 1.28L10.29 12l4.32 5.36a1 1 0 0 1-.78 1.64z"
+                    data-name="arrow-ios-back"></path>
+            </svg>
+        </div>
+    <p id="menu-header">Menu</p>
+
+
+    <p class="menu-element">Cursor Function</p>
+    <div class="radio-select-container menu-element">
+        <input type="radio" id="field-choice-button" name="cursor-function" value="field" checked>
+        <label class="radio-label" for="field-choice-button">Field</label>
+
+        <input type="radio" id="gravity-choice-button" name="cursor-function" value="gravity">
+        <label class="radio-label" for="gravity-choice-button">Gravity</label>
+
+        <input type="radio" id="throw-choice-button" name="cursor-function" value="throw">
+        <label class="radio-label" for="throw-choice-button">Throw</label>
+
+    </div>
+
+    <div class="menu-element">
+        <p class="menu-element">Field Size</p>
+        <div class="slidecontainer">
+            <input type="range" min="30" max="700" value="100" class="slider" id="field-size-slider">
+        </div>
+    </div>
+
+    <div class="menu-element">
+        <p class="menu-element">Field Strength</p>
+        <div class="slidecontainer">
+            <input type="range" min="1" max="50" value="10" class="slider" id="field-strength-slider">
+        </div>
+    </div>
+
+    <div class="menu-element">
+        <p class="menu-element">Gravity Strength</p>
+        <div class="slidecontainer">
+            <input type="range" min="0" max="100" value="10" class="slider" id="gravity-strength-slider">
+        </div>
+    </div>
+
+    <div class="menu-element">
+        <p class="menu-element">Collision Accuracy</p>
+        <input class="menu-element" style="width: 100%" type="number" value="4" id="substeps-amount-entry">
+    </div>
+
+    <div class="menu-element">
+        <p class="menu-element">Num Of Particles</p>
+        <input class="menu-element" style="width: 100%" type="number" value="100" id="particles-amount-entry">
+    </div>
+
+
+    <div class="menu-element">
+        <input type="checkbox" id="drawOutline" name="drawOutline" checked>
+        <label for="drawOutline">Draw Outlines</label>
+    </div>
+
+    </div>
+    <div id="
+    "></div>
+    <script src="./script.js"></script>
+
+</body>
+
+</html>
