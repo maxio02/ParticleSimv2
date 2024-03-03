@@ -27,6 +27,7 @@ var program = createProgram(gl, vertexShader, fragmentShader);
 var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
 var colorUniformLocation = gl.getUniformLocation(program, "u_color");
+var translationLocation = gl.getUniformLocation(program, "u_translation");
 gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 var positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -51,13 +52,14 @@ function setRectangle(gl: WebGLRenderingContext, x:number, y:number, width:numbe
      x2, y2]), gl.STATIC_DRAW);
 }
 
+export function setGeometry(){
+  particles.forEach((particle) => {
+    setRectangle(
+      gl, 0, 0, 30, 30);
+  });
 
+}
 export function drawParticles() {
-
-  
-  gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-
-
   resizeCanvasToDisplaySize(gl.canvas);
 
   // Tell WebGL how to convert from clip space to pixels
@@ -77,8 +79,8 @@ export function drawParticles() {
 
   // Draw the rectangle.
   particles.forEach((particle) => {
-    setRectangle(
-      gl, particle.pos_curr.x, particle.pos_curr.y, 30, 30);
+      gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+      gl.uniform2f(translationLocation, particle.pos_curr.x, particle.pos_curr.y);
       gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
   });

@@ -1,5 +1,5 @@
 import Attractor from "./Attractor";
-import { drawArrow, drawGrid, drawLasso, drawParticles, drawTail } from "./Drawer";
+import { drawArrow, drawGrid, drawLasso, drawParticles, drawTail, setGeometry } from "./Drawer";
 import { closeMenu, getPointerFunction } from "./MenuManager";
 import Particle from "./Particle";
 import { initParticleShader } from "./ShaderHelper";
@@ -158,29 +158,36 @@ function tick(dt: number) {
 
 function applyConstraintToAllEdges() {
 
-  for (var col = 0; col < grid.length; col++) {
-    for (var thickness = 0; thickness < 2; thickness++) {
-      grid[col][thickness].forEach((particle) => {
+  grid.forEach((row) => {
+    row.forEach((gridCell) => {
+      gridCell.forEach((particle) => {
         applyConstraint(particle);
       });
+    });
+  });
+  // for (var col = 0; col < grid.length; col++) {
+  //   for (var thickness = 0; thickness < 2; thickness++) {
+  //     grid[col][thickness].forEach((particle) => {
+  //       applyConstraint(particle);
+  //     });
 
-      grid[col][grid[0].length - thickness - 1].forEach((particle) => {
-        applyConstraint(particle);
-      });
-    }
-  }
+  //     grid[col][grid[0].length - thickness - 1].forEach((particle) => {
+  //       applyConstraint(particle);
+  //     });
+  //   }
+  // }
 
-  for (var row = 0; row < grid[0].length; row++) {
-    for (var thickness = 0; thickness < 2; thickness++) {
-      grid[thickness][row].forEach((particle) => {
-        applyConstraint(particle);
-      });
+  // for (var row = 0; row < grid[0].length; row++) {
+  //   for (var thickness = 0; thickness < 2; thickness++) {
+  //     grid[thickness][row].forEach((particle) => {
+  //       applyConstraint(particle);
+  //     });
 
-      grid[grid.length - thickness - 1][row].forEach((particle) => {
-        applyConstraint(particle);
-      });
-    }
-  }
+  //     grid[grid.length - thickness - 1][row].forEach((particle) => {
+  //       applyConstraint(particle);
+  //     });
+  //   }
+  // }
 }
 
 function updatePositions(dt: number) {
@@ -347,11 +354,11 @@ function handleMouseUp(event: MouseEvent | TouchEvent) {
   }
 }
 
-function getRandomColor(): {r:number, g:number, b:number} {
+function getRandomColor(): { r: number, g: number, b: number } {
   return {
-  r: Math.random(),
-  g: Math.random(),
-  b: Math.random()
+    r: Math.random(),
+    g: Math.random(),
+    b: Math.random()
   }
 }
 
@@ -396,12 +403,13 @@ function animate() {
   }
 
   const mult = fps * 0.016666;
-  if (i % Math.floor(2 * mult) == 0 && particles.length < particleCount) {
-    particles.push(new Particle(new Vec2D(200, 200), 15, new Vec2D(100 * mult, -150 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 260), 15, new Vec2D(90 * mult, -150 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 320), 15, new Vec2D(85 * mult, -150 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 380), 15, new Vec2D(90 * mult, -150 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 440), 15, new Vec2D(85 * mult, -150 * mult), getRandomColor()));
+  if (i % Math.floor(2 * mult) == 0 && particles.length < particleCount && i > 120) {
+    particles.push(new Particle(new Vec2D(200, 200), 15, new Vec2D(200 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 260), 15, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 320), 15, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 380), 15, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 440), 15, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
+    setGeometry();
   }
 
   i++;
@@ -433,6 +441,10 @@ main_body.addEventListener("click", function (event) {
 initParticleShader();
 initializeGrid();
 drawGrid();
+
+// const mult = fps * 0.016666;
+// particles.push(new Particle(new Vec2D(200, 200), 15, new Vec2D(100 * mult, -150 * mult), getRandomColor()));
+
 // attractors.push(new Attractor(new Vec2D(300, 300), 200, 400, true, 'black'))
 // attractors.push(new Attractor(new Vec2D(900, 300), 280, 400, true, 'pink'))
 requestAnimationFrame(animate);
