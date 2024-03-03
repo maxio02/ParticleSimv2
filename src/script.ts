@@ -4,7 +4,7 @@ import { closeMenu, getPointerFunction } from "./MenuManager";
 import Particle from "./Particle";
 import { initParticleShader } from "./ShaderHelper";
 import Vec2D from "./Vec2D";
-export const gridSize = 30;
+export const gridSize = 26;
 export const grid: Particle[][][] = [];
 
 export const particles: Particle[] = [];
