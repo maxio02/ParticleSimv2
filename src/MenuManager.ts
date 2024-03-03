@@ -1,9 +1,9 @@
-import { drawGrid } from "./Drawer";
+import { drawGrid} from "./Drawer";
 import { setFieldSize, setFieldStrength, setGravityStrength, setSubsteps, setParticlesNum, setDrawOutline} from "./script";
 
 const menu_button = document.getElementById("menu-button");
 const menu_elements: NodeListOf<HTMLElement> =  document.querySelectorAll(".menu-element");
-
+export var particle_outline = 1;
 menu_button.addEventListener('click', function(event){
     event.stopPropagation();
     openMenu();
@@ -17,6 +17,7 @@ const switchTheme = () => {
   
     rootElem.setAttribute('theme', newTheme)
     drawGrid();
+    particle_outline = (particle_outline == 1) ? -1 : 1;
     // updateColor();
   }
 
@@ -58,7 +59,7 @@ var field_strength_slider = document.getElementById("field-strength-slider")  as
 var gravity_strength_slider = document.getElementById("gravity-strength-slider")  as HTMLInputElement;
 var substeps_amount_entry = document.getElementById("substeps-amount-entry") as HTMLInputElement;
 var particles_amount_entry = document.getElementById("particles-amount-entry") as HTMLInputElement;
-var outline_checkbox = document.getElementById("drawOutline") as HTMLInputElement;
+// var outline_checkbox = document.getElementById("drawOutline") as HTMLInputElement;
 
 field_size_slider.oninput = function() {
     setFieldSize(parseInt(field_size_slider.value));
@@ -80,9 +81,9 @@ particles_amount_entry.addEventListener('change', function() {
     setParticlesNum(parseInt(particles_amount_entry.value));
 });
 
-outline_checkbox.oninput = function() {
-    setDrawOutline(outline_checkbox.checked)
-}
+// outline_checkbox.oninput = function() {
+//     setDrawOutline(outline_checkbox.checked)
+// }
 
 export function getPointerFunction() {
     var radioButtons = document.getElementsByName('cursor-function') as NodeListOf<HTMLInputElement>

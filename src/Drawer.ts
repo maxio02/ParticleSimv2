@@ -5,6 +5,9 @@ import particleVertexShader from "./shaders/particleVertexShader.vert";
 
 import { back_ctx, ctx, foreground_canvas, particles, gridSize, pointerPosition, fieldSize, clicked, drawOutline, gravity, fps, applyConstraint, applyAttractorForces, grid } from "./script";
 import { createProgram, createShader, initParticleShader, resizeCanvasToDisplaySize } from "./ShaderHelper";
+import { particle_outline } from "./MenuManager";
+
+
 var canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
 var gl = canvas.getContext("webgl");
 
@@ -29,6 +32,7 @@ var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
 var colorUniformLocation = gl.getUniformLocation(program, "u_color");
 var translationLocation = gl.getUniformLocation(program, "u_translation");
 var radiusUniformLocation = gl.getUniformLocation(program, "u_radius");
+var outlineUniformLocation = gl.getUniformLocation(program, "u_outline_black");
 gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 var positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -56,7 +60,7 @@ function setRectangle(gl: WebGLRenderingContext, x:number, y:number, width:numbe
 export function setGeometry(){
   particles.forEach((particle) => {
     setRectangle(
-      gl, 0, 0, 20, 20);
+      gl, 0, 0, gridSize, gridSize);
   });
 
 }
@@ -83,7 +87,8 @@ export function drawParticles() {
       gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
       gl.uniform2f(translationLocation, particle.pos_curr.x, particle.pos_curr.y);
       gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
-      gl.uniform1f(radiusUniformLocation, 10.)
+      gl.uniform1f(radiusUniformLocation, gridSize/2)
+      gl.uniform1f(outlineUniformLocation, particle_outline);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
   });
 

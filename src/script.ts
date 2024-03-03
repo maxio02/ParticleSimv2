@@ -4,12 +4,12 @@ import { closeMenu, getPointerFunction } from "./MenuManager";
 import Particle from "./Particle";
 import { initParticleShader } from "./ShaderHelper";
 import Vec2D from "./Vec2D";
-export const gridSize = 20;
+export const gridSize = 30;
 export const grid: Particle[][][] = [];
 
 export const particles: Particle[] = [];
 var attractors: Attractor[] = [];
-var particleCount = 1000;
+var particleCount = 500;
 var number_of_collisions = 0;
 export const pointerPosition = new Vec2D(0, 0)
 var click_start_position = new Vec2D(0, 0)
@@ -412,11 +412,11 @@ function animate() {
 
   const mult = fps * 0.016666;
   if (i % Math.floor(2 * mult) == 0 && particles.length < particleCount && i > 120) {
-    particles.push(new Particle(new Vec2D(200, 200), 10, new Vec2D(200 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 260), 10, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 320), 10, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 380), 10, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 440), 10, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 200), gridSize/2, new Vec2D(200 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 260), gridSize/2, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 320), gridSize/2, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 380), gridSize/2, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 440), gridSize/2, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
     setGeometry();
   }
 

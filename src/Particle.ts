@@ -10,9 +10,6 @@ import particleVertexShader from "./shaders/particleVertexShader.vert";
 export default class Particle {
     static canvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
     static gl = Particle.canvas!.getContext("2d");
-    // static vertexShader = createShader(Particle.gl, Particle.gl.VERTEX_SHADER, particleVertexShader);
-    // static fragmentShader = createShader(Particle.gl, Particle.gl.FRAGMENT_SHADER, particleFragmentShader);
-    // static program = createProgram(Particle.gl, Particle.vertexShader, Particle.fragmentShader);
     pos_curr: Vec2D
     pos_prev: Vec2D
     acceleration: Vec2D
@@ -31,30 +28,6 @@ export default class Particle {
       this.updateCell(new Vec2D(
                       Math.floor(this.pos_curr.x / gridSize),
                       Math.floor(this.pos_curr.y / gridSize)));
-    }
-
-    draw() {
-      // let xpos: number = this.pos_curr.x
-      // let ypos: number = this.pos_curr.y
-      // Particle.gl.beginPath();
-      // Particle.gl.arc(
-      //   xpos,
-      //   ypos,
-      //   this.radius,
-      //   0,
-      //   2 * Math.PI,
-      //   false
-      // );
-      // Particle.gl.fillStyle = this.color;
-      // Particle.gl.fill();
-
-      // if(drawOutline){
-      //   Particle.gl.lineWidth = 2;
-      //   Particle.gl.strokeStyle = "black";
-      //   Particle.gl.stroke();
-      // }
-
-      // Particle.gl.closePath();
     }
 
     updatePosition(dt: number){
