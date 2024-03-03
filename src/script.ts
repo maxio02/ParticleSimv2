@@ -2,28 +2,37 @@ import Attractor from "./Attractor";
 import { drawArrow, drawGrid, drawLasso, drawParticles, drawTail } from "./Drawer";
 import { closeMenu, getPointerFunction } from "./MenuManager";
 import Particle from "./Particle";
+import { initParticleShader } from "./ShaderHelper";
 import Vec2D from "./Vec2D";
-export const gridSize = 30;
+export const gridSize = 31;
 export const grid: Particle[][][] = [];
 
 export const particles: Particle[] = [];
 var attractors: Attractor[] = [];
 var particleCount = 100;
+var number_of_collisions = 0;
 export const pointerPosition = new Vec2D(0, 0)
 var click_start_position = new Vec2D(0, 0)
 var pointer_function = 'field'
 export var gravity = new Vec2D(0, 1)
 export const foreground_canvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
 const background_canvas = document.getElementById('background-canvas') as HTMLCanvasElement;
-export var fieldSize = 100
+const webgl_canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
+
+export var fieldSize = 1
 export var drawOutline = true
 var fieldStrength = 10
 var substeps_amount = 4
+var gridColumns = Math.ceil(foreground_canvas.width / gridSize);
+var gridRows = Math.ceil(foreground_canvas.height / gridSize);
 foreground_canvas!.width = foreground_canvas.getBoundingClientRect().width;
 foreground_canvas!.height = foreground_canvas.getBoundingClientRect().height;
 background_canvas!.width = background_canvas.getBoundingClientRect().width;
 background_canvas!.height = background_canvas.getBoundingClientRect().height;
-export const ctx = Particle.canvas!.getContext('2d');
+webgl_canvas!.width = webgl_canvas.getBoundingClientRect().width;
+webgl_canvas!.height = webgl_canvas.getBoundingClientRect().height;
+export const ctx = foreground_canvas.getContext('2d');
+// export const ctx = Particle.canvas!.getContext('2d');
 export const back_ctx = background_canvas.getContext('2d');
 export var fps = 60;
 export let clicked = false
@@ -31,16 +40,21 @@ let fpsCounter = document.createElement('div');
 fpsCounter.style.position = 'absolute';
 fpsCounter.style.top = '10px';
 fpsCounter.style.left = '10px';
-fpsCounter.style.color = 'black';
 
 let particleCounter = document.createElement('div');
 particleCounter.style.position = 'absolute';
 particleCounter.style.top = '30px';
 particleCounter.style.left = '10px';
-particleCounter.style.color = 'black';
+
+let collisionCounter = document.createElement('div');
+collisionCounter.style.position = 'absolute';
+collisionCounter.style.top = '50px';
+collisionCounter.style.left = '10px';
+
 
 document.body.appendChild(fpsCounter);
 document.body.appendChild(particleCounter);
+document.body.appendChild(collisionCounter);
 
 export function setFieldStrength(value: number) {
   fieldStrength = value;
@@ -51,7 +65,7 @@ export function setFieldSize(value: number) {
 }
 
 export function setGravityStrength(value: number) {
-  gravity = new Vec2D(0, value / 10);
+  gravity = new Vec2D(0, value * 0.1);
 }
 
 export function setSubsteps(value: number) {
@@ -67,26 +81,23 @@ export function setDrawOutline(value: boolean) {
 }
 
 function initializeGrid() {
-  const columns = Math.ceil(foreground_canvas.width / gridSize);
-  const rows = Math.ceil(foreground_canvas.height / gridSize);
-
-  for (let i = 0; i < columns; i++) {
+  gridColumns = Math.ceil(foreground_canvas.width / gridSize);
+  gridRows = Math.ceil(foreground_canvas.height / gridSize);
+  console.log(gridColumns);
+  console.log(gridRows);
+  for (let i = 0; i < gridColumns; i++) {
     grid[i] = [];
-    for (let j = 0; j < rows; j++) {
+    for (let j = 0; j < gridRows; j++) {
       grid[i][j] = [];
     }
   }
 }
 
-function removeFromGrid(particle: Particle) {
-  const column = Math.floor(particle.pos_curr.x / gridSize);
-  const row = Math.floor(particle.pos_curr.y / gridSize);
-
-  if (column >= 0 && column < grid.length && row >= 0 && row < grid[column].length) {
-    const particlesInCell = grid[column][row];
-    const index = particlesInCell.indexOf(particle);
-    if (index !== -1) {
-      particlesInCell.splice(index, 1);
+function removeFromGrid() {
+  for (let i = 0; i < gridColumns; i++) {
+    grid[i] = [];
+    for (let j = 0; j < gridRows; j++) {
+      grid[i][j] = [];
     }
   }
 }
@@ -137,23 +148,45 @@ function tick(dt: number) {
       }
 
     }
-    applyAttractorForcesToAll();
-    applyConstraintToAll();
+    // applyAttractorForcesToAll();
+    applyConstraintToAllEdges();
     solveCollisions();
     updatePositions(sub_dt);
   }
 }
 
 
-function applyConstraintToAll() {
-  particles.forEach((particle) => {
-    applyConstraint(particle);
-  });
+function applyConstraintToAllEdges() {
+
+  for (var col = 0; col < grid.length; col++) {
+    for (var thickness = 0; thickness < 2; thickness++) {
+      grid[col][thickness].forEach((particle) => {
+        applyConstraint(particle);
+      });
+
+      grid[col][grid[0].length - thickness - 1].forEach((particle) => {
+        applyConstraint(particle);
+      });
+    }
+  }
+
+  for (var row = 0; row < grid[0].length; row++) {
+    for (var thickness = 0; thickness < 2; thickness++) {
+      grid[thickness][row].forEach((particle) => {
+        applyConstraint(particle);
+      });
+
+      grid[grid.length - thickness - 1][row].forEach((particle) => {
+        applyConstraint(particle);
+      });
+    }
+  }
 }
 
 function updatePositions(dt: number) {
+  removeFromGrid();
   particles.forEach((particle) => {
-    removeFromGrid(particle);
+
     particle.updatePosition(dt);
     addToGrid(particle);
   });
@@ -184,7 +217,7 @@ function applyAttractorForcesToAll() {
   });
 }
 
-export function applyAttractorForces(particle: Particle){
+export function applyAttractorForces(particle: Particle) {
   attractors.forEach((attractor) => {
     const pullDirection = attractor.pos.difference(particle.pos_curr)
     const distance = pullDirection.length();
@@ -198,10 +231,12 @@ export function applyAttractorForces(particle: Particle){
 }
 
 function solveCollisions() {
+  number_of_collisions = 0;
   particles.forEach((particle1) => {
     const neighboringParticles = getNeighboringParticles(particle1);
 
     neighboringParticles.forEach((particle2) => {
+      number_of_collisions++;
       let collision_direction = particle1.pos_curr.difference(particle2.pos_curr)
 
       let distance = collision_direction.length();
@@ -248,6 +283,7 @@ export function applyConstraint(particle: Particle) {
 
 function clearCanvas() {
   ctx.clearRect(0, 0, foreground_canvas.width, foreground_canvas.height);
+  // back_ctx.clearRect(0, 0, foreground_canvas.width, foreground_canvas.height);
 }
 
 function updateCanvasSize() {
@@ -255,15 +291,18 @@ function updateCanvasSize() {
   foreground_canvas.height = foreground_canvas.getBoundingClientRect().height;
   background_canvas.width = background_canvas.getBoundingClientRect().width;
   background_canvas.height = background_canvas.getBoundingClientRect().height;
+  webgl_canvas.width = webgl_canvas.getBoundingClientRect().width;
+  webgl_canvas.height = webgl_canvas.getBoundingClientRect().height;
+  initParticleShader();
   initializeGrid();
   drawGrid();
 }
 
 let frameCount = 0;
-let lastTime = performance.now() / 10;
+let lastTime = performance.now() * 0.1;
 
 function calculateFPS() {
-  const currentTime = performance.now() / 10;
+  const currentTime = performance.now() * 0.1;
   const timeDiff = currentTime - lastTime;
   const fps = Math.round(1000 / timeDiff);
   lastTime = currentTime;
@@ -308,11 +347,12 @@ function handleMouseUp(event: MouseEvent | TouchEvent) {
   }
 }
 
-function getRandomColor(): string {
-  let red = Math.floor(Math.random() * 256);
-  let green = Math.floor(Math.random() * 256);
-  let blue = Math.floor(Math.random() * 256);
-  return `rgb(${red}, ${green}, ${blue})`;
+function getRandomColor(): {r:number, g:number, b:number} {
+  return {
+  r: Math.random(),
+  g: Math.random(),
+  b: Math.random()
+  }
 }
 
 function handleMoveEvent(event: MouseEvent | TouchEvent) {
@@ -340,7 +380,8 @@ function animate() {
   tick(0.5 / fps * 60);
   clearCanvas();
   drawParticles();
-  drawAttractors();
+  // drawGrid();
+  // drawAttractors();
   switch (pointer_function) {
     case 'field':
       drawLasso();
@@ -354,8 +395,8 @@ function animate() {
 
   }
 
-  const mult = fps / 60
-  if (i % Math.floor(8 * mult) == 0 && particles.length < particleCount) {
+  const mult = fps * 0.016666;
+  if (i % Math.floor(2 * mult) == 0 && particles.length < particleCount) {
     particles.push(new Particle(new Vec2D(200, 200), 15, new Vec2D(100 * mult, -150 * mult), getRandomColor()));
     particles.push(new Particle(new Vec2D(200, 260), 15, new Vec2D(90 * mult, -150 * mult), getRandomColor()));
     particles.push(new Particle(new Vec2D(200, 320), 15, new Vec2D(85 * mult, -150 * mult), getRandomColor()));
@@ -371,6 +412,7 @@ function animate() {
     fps = calculateFPS();
     fpsCounter.innerText = `FPS: ${fps}`;
     particleCounter.innerText = `Particles: ${particles.length}`;
+    collisionCounter.innerText = `Collisions: ${number_of_collisions}`;
   }
   requestAnimationFrame(animate);
 }
@@ -388,7 +430,7 @@ main_body.addEventListener("click", function (event) {
   event.stopPropagation();
   closeMenu();
 });
-
+initParticleShader();
 initializeGrid();
 drawGrid();
 // attractors.push(new Attractor(new Vec2D(300, 300), 200, 400, true, 'black'))

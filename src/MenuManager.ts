@@ -1,3 +1,4 @@
+import { drawGrid } from "./Drawer";
 import { setFieldSize, setFieldStrength, setGravityStrength, setSubsteps, setParticlesNum, setDrawOutline} from "./script";
 
 const menu_button = document.getElementById("menu-button");
@@ -8,6 +9,19 @@ menu_button.addEventListener('click', function(event){
     openMenu();
 });
 
+const switchTheme = () => {
+    const rootElem = document.documentElement
+    let theme = rootElem.getAttribute('theme'),
+      newTheme
+    newTheme = (theme === 'light') ? 'dark' : 'light'
+  
+    rootElem.setAttribute('theme', newTheme)
+    drawGrid();
+    // updateColor();
+  }
+
+
+document.querySelector('#theme-switch').addEventListener('click', switchTheme);
 
 export function openMenu() {
     if (menu_button.getAttribute("open") == "false") {

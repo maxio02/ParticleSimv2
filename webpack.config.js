@@ -11,10 +11,14 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.(glsl|vs|fs|vert|frag)$/,
+        type: 'asset/source'
+      }
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.glsl', '.vs', '.fs', '.vert', '.frag'],
   },
   output: {
     filename: 'script.js',

@@ -1,17 +1,95 @@
 import Particle from "./Particle";
 import Vec2D from "./Vec2D";
-import { back_ctx, ctx, foreground_canvas, particles, gridSize, pointerPosition, fieldSize, clicked, drawOutline, gravity, fps, applyConstraint, applyAttractorForces } from "./script";
+import particleFragmentShader from "./shaders/particleFragmentShader.frag";
+import particleVertexShader from "./shaders/particleVertexShader.vert";
+
+import { back_ctx, ctx, foreground_canvas, particles, gridSize, pointerPosition, fieldSize, clicked, drawOutline, gravity, fps, applyConstraint, applyAttractorForces, grid } from "./script";
+import { createProgram, createShader, initParticleShader, resizeCanvasToDisplaySize } from "./ShaderHelper";
+var canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
+var gl = canvas.getContext("webgl");
+
+if (!gl) {
+  console.error("Unable to initialize WebGL. Your browser may not support it.");
+}
+
+//enalbing blending for proper alpha on the particles
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+//compiling the shaders with a helper function
+var vertexShader = createShader(gl, gl.VERTEX_SHADER, particleVertexShader);
+var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, particleFragmentShader);
+
+//creating a WebGL program and attaching the shaders to it with a helper function
+var program = createProgram(gl, vertexShader, fragmentShader);
+
+//looking up uniform location and where the vertex data needs to go
+var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+var colorUniformLocation = gl.getUniformLocation(program, "u_color");
+gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+var positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+function setRectangle(gl: WebGLRenderingContext, x:number, y:number, width:number, height:number) {
+  var x1 = x - width / 2;
+  var x2 = x + width / 2;
+  var y1 = y - height / 2;
+  var y2 = y + height / 2;
+ 
+  // NOTE: gl.bufferData(gl.ARRAY_BUFFER, ...) will affect
+  // whatever buffer is bound to the `ARRAY_BUFFER` bind point
+  // but so far we only have one buffer. If we had more than one
+  // buffer we'd want to bind that buffer to `ARRAY_BUFFER` first.
+ 
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+     x1, y1,
+     x2, y1,
+     x1, y2,
+     x1, y2,
+     x2, y1,
+     x2, y2]), gl.STATIC_DRAW);
+}
 
 
 export function drawParticles() {
+
+  
+  gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+
+
+  resizeCanvasToDisplaySize(gl.canvas);
+
+  // Tell WebGL how to convert from clip space to pixels
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+  // Clear the canvas
+  gl.clearColor(0, 0, 0, 0); // Clear to transparent black
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Tell it to use program (pair of shaders)
+  gl.useProgram(program);
+
+  gl.enableVertexAttribArray(positionAttributeLocation);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+  // Draw the rectangle.
   particles.forEach((particle) => {
-    particle.draw();
+    setRectangle(
+      gl, particle.pos_curr.x, particle.pos_curr.y, 30, 30);
+      gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
   });
+
 }
 
 export function drawGrid() {
-  back_ctx.clearRect(0, 0, foreground_canvas.width, foreground_canvas.height)
-  back_ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+
+  back_ctx.clearRect(0, 0, foreground_canvas.width, foreground_canvas.height);
+
+  back_ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
   back_ctx.lineWidth = 1;
   for (let x = gridSize; x < foreground_canvas.width; x += gridSize) {
     back_ctx.beginPath();
@@ -25,6 +103,16 @@ export function drawGrid() {
     back_ctx.lineTo(foreground_canvas.width, y);
     back_ctx.stroke();
   }
+  //DEBUG
+  //   for (let x = 0; x < grid.length; x += 1) {
+
+  //   for (let y = 0; y < grid[0].length; y += 1) {
+  //     back_ctx.font = "12px serif";
+
+  //     back_ctx.fillText(`${grid[x][y].length}`, (x+1)*gridSize - gridSize/2 - 2, (y+1)*gridSize -gridSize/2 + 4);
+  //     // back_ctx.fillText(`${x} ${y}`, (x+1)*gridSize - gridSize/2 - 2, (y+1)*gridSize -gridSize/2 + 4);
+  //   }
+  // }
 }
 
 export function drawTail(from: Vec2D, to: Vec2D) {
@@ -45,29 +133,29 @@ export function drawTail(from: Vec2D, to: Vec2D) {
       var dotY = from.y - distance.y * i;
       drawDot(dotX, dotY, dotSize, 255);
     }
-    
+
   }
 }
 
-function drawPredictedPath(startPos: Vec2D, vec: Vec2D){
+function drawPredictedPath(startPos: Vec2D, vec: Vec2D) {
   let dotCount = 510;
-  let predictedDot = new Particle(startPos, 15, vec, 'black')
+  let predictedDot = new Particle(startPos, 15, vec, {r:0, g:0, b:0})
   for (let i = 1; i <= dotCount; i++) {
 
     predictedDot.accelerate(gravity);
     applyConstraint(predictedDot);
     applyAttractorForces(predictedDot);
     predictedDot.updatePosition(0.5 * 0.25);
-    
-    if(i%15 == 0){
-      drawDot(predictedDot.pos_curr.x, predictedDot.pos_curr.y, 5, 255-i/2)
+
+    if (i % 15 == 0) {
+      drawDot(predictedDot.pos_curr.x, predictedDot.pos_curr.y, 5, 255 - i / 2)
     }
 
   }
 
 }
 
-export function drawDot(dotX: number, dotY: number, dotSize: number, opacity:number) {
+export function drawDot(dotX: number, dotY: number, dotSize: number, opacity: number) {
   ctx.beginPath();
   ctx.arc(
     dotX,
@@ -78,7 +166,7 @@ export function drawDot(dotX: number, dotY: number, dotSize: number, opacity:num
     false
   );
 
-  ctx.fillStyle = `rgba(210, 210, 210, ${opacity/255})`;
+  ctx.fillStyle = `rgba(210, 210, 210, ${opacity / 255})`;
   ctx.fill();
 
   ctx.closePath();
@@ -90,7 +178,7 @@ export function drawLasso() {
     ctx.beginPath();
     ctx.arc(pointerPosition.x, pointerPosition.y, fieldSize, 0, 2 * Math.PI);
     ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
     ctx.stroke();
     ctx.closePath();
   }
