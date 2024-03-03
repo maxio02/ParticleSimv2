@@ -11,6 +11,12 @@ export default class Vec2D {
       this.x += other.x;
       this.y += other.y;
     }
+
+    set(other: Vec2D){
+      this.x = other.x;
+      this.y = other.y;
+      return this;
+    }
     
     subtract(other: Vec2D){
       this.x -= other.x;
@@ -33,6 +39,10 @@ export default class Vec2D {
 
     length(): number {
       return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    squaredLength(): number {
+      return this.x * this.x + this.y * this.y;
     }
 
     clone(): Vec2D{

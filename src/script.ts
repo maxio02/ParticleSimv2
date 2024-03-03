@@ -4,12 +4,12 @@ import { closeMenu, getPointerFunction } from "./MenuManager";
 import Particle from "./Particle";
 import { initParticleShader } from "./ShaderHelper";
 import Vec2D from "./Vec2D";
-export const gridSize = 31;
+export const gridSize = 20;
 export const grid: Particle[][][] = [];
 
 export const particles: Particle[] = [];
 var attractors: Attractor[] = [];
-var particleCount = 100;
+var particleCount = 1000;
 var number_of_collisions = 0;
 export const pointerPosition = new Vec2D(0, 0)
 var click_start_position = new Vec2D(0, 0)
@@ -19,7 +19,7 @@ export const foreground_canvas = document.getElementById('foreground-canvas') as
 const background_canvas = document.getElementById('background-canvas') as HTMLCanvasElement;
 const webgl_canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
 
-export var fieldSize = 1
+export var fieldSize = 100
 export var drawOutline = true
 var fieldStrength = 10
 var substeps_amount = 4
@@ -158,12 +158,8 @@ function tick(dt: number) {
 
 function applyConstraintToAllEdges() {
 
-  grid.forEach((row) => {
-    row.forEach((gridCell) => {
-      gridCell.forEach((particle) => {
-        applyConstraint(particle);
-      });
-    });
+  particles.forEach((particle) => {
+    applyConstraint(particle);
   });
   // for (var col = 0; col < grid.length; col++) {
   //   for (var thickness = 0; thickness < 2; thickness++) {
@@ -239,23 +235,35 @@ export function applyAttractorForces(particle: Particle) {
 
 function solveCollisions() {
   number_of_collisions = 0;
+
+
+  let tempCollisionDirection = new Vec2D(0, 0);
+  let squaredDistance = 0;
+  let radiiSum = 0;
+  let squaredRadiiSum = 0;
+
   particles.forEach((particle1) => {
     const neighboringParticles = getNeighboringParticles(particle1);
 
     neighboringParticles.forEach((particle2) => {
-      number_of_collisions++;
-      let collision_direction = particle1.pos_curr.difference(particle2.pos_curr)
+      if (particle1 === particle2) return;
 
-      let distance = collision_direction.length();
-      if (distance != 0) {
-        if (distance < particle1.radius + particle2.radius) {
-          collision_direction.divide(distance);
-          let delta = particle1.radius + particle2.radius - distance;
-          collision_direction.multiply(delta * 0.5)
+      tempCollisionDirection.set(particle1.pos_curr).subtract(particle2.pos_curr);
+      squaredDistance = tempCollisionDirection.squaredLength();
 
-          particle1.pos_curr.add(collision_direction);
-          particle2.pos_curr.subtract(collision_direction);
-        }
+      radiiSum = particle1.radius + particle2.radius;
+      squaredRadiiSum = radiiSum * radiiSum;
+
+      if (squaredDistance < squaredRadiiSum && squaredDistance != 0) {
+        number_of_collisions++;
+          let distance = Math.sqrt(squaredDistance);
+          tempCollisionDirection.divide(distance);
+      
+          let delta = radiiSum - distance;
+          tempCollisionDirection.multiply(delta * 0.5);
+      
+          particle1.pos_curr.add(tempCollisionDirection);
+          particle2.pos_curr.subtract(tempCollisionDirection);
       }
     });
   });
@@ -404,11 +412,11 @@ function animate() {
 
   const mult = fps * 0.016666;
   if (i % Math.floor(2 * mult) == 0 && particles.length < particleCount && i > 120) {
-    particles.push(new Particle(new Vec2D(200, 200), 15, new Vec2D(200 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 260), 15, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 320), 15, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 380), 15, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
-    particles.push(new Particle(new Vec2D(200, 440), 15, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 200), 10, new Vec2D(200 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 260), 10, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 320), 10, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 380), 10, new Vec2D(180 * mult, -80 * mult), getRandomColor()));
+    particles.push(new Particle(new Vec2D(200, 440), 10, new Vec2D(170 * mult, -80 * mult), getRandomColor()));
     setGeometry();
   }
 

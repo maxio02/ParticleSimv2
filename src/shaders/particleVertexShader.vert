@@ -6,6 +6,7 @@ attribute vec2 a_position;
 // varying vec3 v_color;
 uniform vec2 u_resolution;
 uniform vec2 u_translation;
+
 void main() {
     //move the position of the shader
     vec2 position = a_position + u_translation;
@@ -19,8 +20,8 @@ void main() {
     // convert from 0->2 to -1->+1 (clipspace)
     vec2 clipSpace = zeroToTwo - 1.0;
 
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+    gl_Position = vec4(clipSpace , 0, 1);
 
     // // Pass the vertex color to the fragment shader.
-    //  v_color = color;
+    // v_position = a_position;
 }
