@@ -74,6 +74,11 @@ export function setSubsteps(value: number) {
 
 export function setParticlesNum(value: number) {
   particleCount = value;
+  let diff = particles.length - particleCount;
+  while( diff > 0){
+   particles.pop();
+   diff--;
+  }
 }
 
 export function setDrawOutline(value: boolean) {
