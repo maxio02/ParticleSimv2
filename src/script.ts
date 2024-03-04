@@ -2,38 +2,37 @@ import Attractor from "./Attractor";
 import { drawArrow, drawGrid, drawLasso, drawParticles, drawTail, setGeometry } from "./Drawer";
 import { closeMenu, getPointerFunction } from "./MenuManager";
 import Particle from "./Particle";
-import { initParticleShader } from "./ShaderHelper";
 import Vec2D from "./Vec2D";
-export const gridSize = 26;
+export const gridSize = 30;
 export const grid: Particle[][][] = [];
 
 export const particles: Particle[] = [];
 var attractors: Attractor[] = [];
 var particleCount = 500;
-var number_of_collisions = 0;
+var numberOfCollisions = 0;
 export const pointerPosition = new Vec2D(0, 0)
-var click_start_position = new Vec2D(0, 0)
-var pointer_function = 'field'
+var clickStartPosition = new Vec2D(0, 0)
+var pointerFunction = 'field'
 export var gravity = new Vec2D(0, 1)
-export const foreground_canvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
-const background_canvas = document.getElementById('background-canvas') as HTMLCanvasElement;
-const webgl_canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
+export const foregroundCanvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
+const backgroundCanvas = document.getElementById('background-canvas') as HTMLCanvasElement;
+const webglCanvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
 
 export var fieldSize = 100
 export var drawOutline = true
 var fieldStrength = 10
-var substeps_amount = 4
-var gridColumns = Math.ceil(foreground_canvas.width / gridSize);
-var gridRows = Math.ceil(foreground_canvas.height / gridSize);
-foreground_canvas!.width = foreground_canvas.getBoundingClientRect().width;
-foreground_canvas!.height = foreground_canvas.getBoundingClientRect().height;
-background_canvas!.width = background_canvas.getBoundingClientRect().width;
-background_canvas!.height = background_canvas.getBoundingClientRect().height;
-webgl_canvas!.width = webgl_canvas.getBoundingClientRect().width;
-webgl_canvas!.height = webgl_canvas.getBoundingClientRect().height;
-export const ctx = foreground_canvas.getContext('2d');
+var physicsSubstepsAmount = 4
+var gridColumns = Math.ceil(foregroundCanvas.width / gridSize);
+var gridRows = Math.ceil(foregroundCanvas.height / gridSize);
+foregroundCanvas!.width = foregroundCanvas.getBoundingClientRect().width;
+foregroundCanvas!.height = foregroundCanvas.getBoundingClientRect().height;
+backgroundCanvas!.width = backgroundCanvas.getBoundingClientRect().width;
+backgroundCanvas!.height = backgroundCanvas.getBoundingClientRect().height;
+webglCanvas!.width = webglCanvas.getBoundingClientRect().width;
+webglCanvas!.height = webglCanvas.getBoundingClientRect().height;
+export const foregroundCanvasCtx = foregroundCanvas.getContext('2d');
 // export const ctx = Particle.canvas!.getContext('2d');
-export const back_ctx = background_canvas.getContext('2d');
+export const backgroundCanvasCtx = backgroundCanvas.getContext('2d');
 export var fps = 60;
 export let clicked = false
 let fpsCounter = document.createElement('div');
@@ -69,16 +68,11 @@ export function setGravityStrength(value: number) {
 }
 
 export function setSubsteps(value: number) {
-  substeps_amount = value;
+  physicsSubstepsAmount = value;
 }
 
 export function setParticlesNum(value: number) {
   particleCount = value;
-  let diff = particles.length - particleCount;
-  while( diff > 0){
-   particles.pop();
-   diff--;
-  }
 }
 
 export function setDrawOutline(value: boolean) {
@@ -86,8 +80,8 @@ export function setDrawOutline(value: boolean) {
 }
 
 function initializeGrid() {
-  gridColumns = Math.ceil(foreground_canvas.width / gridSize);
-  gridRows = Math.ceil(foreground_canvas.height / gridSize);
+  gridColumns = Math.ceil(foregroundCanvas.width / gridSize);
+  gridRows = Math.ceil(foregroundCanvas.height / gridSize);
   console.log(gridColumns);
   console.log(gridRows);
   for (let i = 0; i < gridColumns; i++) {
@@ -108,8 +102,8 @@ function removeFromGrid() {
 }
 
 function addToGrid(particle: Particle) {
-  const column = Math.floor(particle.pos_curr.x / gridSize);
-  const row = Math.floor(particle.pos_curr.y / gridSize);
+  const column = Math.floor(particle.currentPosition.x / gridSize);
+  const row = Math.floor(particle.currentPosition.y / gridSize);
 
   if (column >= 0 && column < grid.length && row >= 0 && row < grid[column].length) {
     grid[column][row].push(particle);
@@ -117,8 +111,8 @@ function addToGrid(particle: Particle) {
 }
 
 function getNeighboringParticles(particle: Particle): Particle[] {
-  const column = Math.floor(particle.pos_curr.x / gridSize);
-  const row = Math.floor(particle.pos_curr.y / gridSize);
+  const column = Math.floor(particle.currentPosition.x / gridSize);
+  const row = Math.floor(particle.currentPosition.y / gridSize);
   const neighboringParticles: Particle[] = [];
 
   for (let i = column - 1; i <= column + 1; i++) {
@@ -132,20 +126,19 @@ function getNeighboringParticles(particle: Particle): Particle[] {
 }
 
 function tick(dt: number) {
-  var sub_steps = substeps_amount;
-  var sub_dt = dt / sub_steps;
+  var sub_dt = dt / physicsSubstepsAmount;
 
-  for (var i = 0; i < sub_steps; i++) {
+  for (var i = 0; i < physicsSubstepsAmount; i++) {
     if (gravity.y != 0) {
       applyGravity();
     }
     if (clicked) {
-      switch (pointer_function) {
+      switch (pointerFunction) {
         case 'field':
           applyField(pointerPosition);
           break;
         case 'gravity':
-          gravity = pointerPosition.difference(click_start_position)
+          gravity = pointerPosition.difference(clickStartPosition)
           gravity.divide(200)
         case 'throw':
           break;
@@ -208,7 +201,7 @@ function applyGravity() {
 
 function applyField(fieldPos: Vec2D) {
   particles.forEach((particle) => {
-    const pullDirection = fieldPos.difference(particle.pos_curr)
+    const pullDirection = fieldPos.difference(particle.currentPosition)
     const distance = pullDirection.length();
 
     if (distance < fieldSize && distance > 10) {
@@ -227,7 +220,7 @@ function applyAttractorForcesToAll() {
 
 export function applyAttractorForces(particle: Particle) {
   attractors.forEach((attractor) => {
-    const pullDirection = attractor.pos.difference(particle.pos_curr)
+    const pullDirection = attractor.position.difference(particle.currentPosition)
     const distance = pullDirection.length();
 
     if (distance < attractor.radius && distance > 10) {
@@ -239,7 +232,7 @@ export function applyAttractorForces(particle: Particle) {
 }
 
 function solveCollisions() {
-  number_of_collisions = 0;
+  numberOfCollisions = 0;
 
 
   let tempCollisionDirection = new Vec2D(0, 0);
@@ -253,22 +246,22 @@ function solveCollisions() {
     neighboringParticles.forEach((particle2) => {
       if (particle1 === particle2) return;
 
-      tempCollisionDirection.set(particle1.pos_curr).subtract(particle2.pos_curr);
+      tempCollisionDirection.set(particle1.currentPosition).subtract(particle2.currentPosition);
       squaredDistance = tempCollisionDirection.squaredLength();
 
       radiiSum = particle1.radius + particle2.radius;
       squaredRadiiSum = radiiSum * radiiSum;
 
       if (squaredDistance < squaredRadiiSum && squaredDistance != 0) {
-        number_of_collisions++;
+        numberOfCollisions++;
           let distance = Math.sqrt(squaredDistance);
           tempCollisionDirection.divide(distance);
       
           let delta = radiiSum - distance;
           tempCollisionDirection.multiply(delta * 0.5);
       
-          particle1.pos_curr.add(tempCollisionDirection);
-          particle2.pos_curr.subtract(tempCollisionDirection);
+          particle1.currentPosition.add(tempCollisionDirection);
+          particle2.currentPosition.subtract(tempCollisionDirection);
       }
     });
   });
@@ -276,44 +269,43 @@ function solveCollisions() {
 
 export function applyConstraint(particle: Particle) {
   // Apply floor constraint
-  if (particle.pos_curr.y + particle.radius > foreground_canvas.height) {
-    particle.pos_curr.y = foreground_canvas.height - particle.radius;
-    particle.pos_prev.y = particle.pos_curr.y + particle.pos_curr.y - particle.pos_prev.y;
+  if (particle.currentPosition.y + particle.radius > foregroundCanvas.height) {
+    particle.currentPosition.y = foregroundCanvas.height - particle.radius;
+    particle.previousPosition.y = particle.currentPosition.y + particle.currentPosition.y - particle.previousPosition.y;
   }
 
   // Apply Ceiling constraint
-  if (particle.pos_curr.y - particle.radius < 0) {
-    particle.pos_curr.y = particle.radius;
-    particle.pos_prev.y = particle.pos_curr.y + particle.pos_curr.y - particle.pos_prev.y;
+  if (particle.currentPosition.y - particle.radius < 0) {
+    particle.currentPosition.y = particle.radius;
+    particle.previousPosition.y = particle.currentPosition.y + particle.currentPosition.y - particle.previousPosition.y;
   }
 
 
   // Apply left wall constraint
-  if (particle.pos_curr.x - particle.radius < 0) {
-    particle.pos_curr.x = particle.radius;
-    particle.pos_prev.x = particle.pos_curr.x + particle.pos_curr.x - particle.pos_prev.x;
+  if (particle.currentPosition.x - particle.radius < 0) {
+    particle.currentPosition.x = particle.radius;
+    particle.previousPosition.x = particle.currentPosition.x + particle.currentPosition.x - particle.previousPosition.x;
   }
 
   // Apply right wall constraint
-  if (particle.pos_curr.x + particle.radius > foreground_canvas.width) {
-    particle.pos_curr.x = foreground_canvas.width - particle.radius;
+  if (particle.currentPosition.x + particle.radius > foregroundCanvas.width) {
+    particle.currentPosition.x = foregroundCanvas.width - particle.radius;
 
   }
 }
 
 function clearCanvas() {
-  ctx.clearRect(0, 0, foreground_canvas.width, foreground_canvas.height);
+  foregroundCanvasCtx.clearRect(0, 0, foregroundCanvas.width, foregroundCanvas.height);
   // back_ctx.clearRect(0, 0, foreground_canvas.width, foreground_canvas.height);
 }
 
 function updateCanvasSize() {
-  foreground_canvas.width = foreground_canvas.getBoundingClientRect().width;
-  foreground_canvas.height = foreground_canvas.getBoundingClientRect().height;
-  background_canvas.width = background_canvas.getBoundingClientRect().width;
-  background_canvas.height = background_canvas.getBoundingClientRect().height;
-  webgl_canvas.width = webgl_canvas.getBoundingClientRect().width;
-  webgl_canvas.height = webgl_canvas.getBoundingClientRect().height;
-  initParticleShader();
+  foregroundCanvas.width = foregroundCanvas.getBoundingClientRect().width;
+  foregroundCanvas.height = foregroundCanvas.getBoundingClientRect().height;
+  backgroundCanvas.width = backgroundCanvas.getBoundingClientRect().width;
+  backgroundCanvas.height = backgroundCanvas.getBoundingClientRect().height;
+  webglCanvas.width = webglCanvas.getBoundingClientRect().width;
+  webglCanvas.height = webglCanvas.getBoundingClientRect().height;
   initializeGrid();
   drawGrid();
 }
@@ -332,7 +324,7 @@ function calculateFPS() {
 function handleMouseDown(event: MouseEvent | TouchEvent) {
   event.stopPropagation()
   clicked = true;
-  pointer_function = getPointerFunction()
+  pointerFunction = getPointerFunction()
 
   if (event instanceof MouseEvent) {
     pointerPosition.x = event.clientX;
@@ -344,8 +336,8 @@ function handleMouseDown(event: MouseEvent | TouchEvent) {
     pointerPosition.y = event.touches[0].clientY;
   }
 
-  click_start_position.x = pointerPosition.x;
-  click_start_position.y = pointerPosition.y;
+  clickStartPosition.x = pointerPosition.x;
+  clickStartPosition.y = pointerPosition.y;
 
 }
 
@@ -353,15 +345,15 @@ function handleMouseUp(event: MouseEvent | TouchEvent) {
   event.stopPropagation()
   clicked = false;
 
-  switch (pointer_function) {
+  switch (pointerFunction) {
     case 'field':
       break;
     case 'gravity':
       break;
     case 'throw':
-      let launch_dir = click_start_position.difference(pointerPosition)
+      let launch_dir = clickStartPosition.difference(pointerPosition)
       launch_dir.multiply(fps / 60)
-      particles.push(new Particle(click_start_position.clone(), 15, launch_dir, getRandomColor()));
+      particles.push(new Particle(clickStartPosition.clone(), 15, launch_dir, getRandomColor()));
       break;
 
   }
@@ -402,15 +394,15 @@ function animate() {
   drawParticles();
   // drawGrid();
   // drawAttractors();
-  switch (pointer_function) {
+  switch (pointerFunction) {
     case 'field':
       drawLasso();
       break;
     case 'gravity':
-      drawArrow(click_start_position, pointerPosition)
+      drawArrow(clickStartPosition, pointerPosition)
       break;
     case 'throw':
-      drawTail(click_start_position, pointerPosition)
+      drawTail(clickStartPosition, pointerPosition)
       break;
 
   }
@@ -433,7 +425,7 @@ function animate() {
     fps = calculateFPS();
     fpsCounter.innerText = `FPS: ${fps}`;
     particleCounter.innerText = `Particles: ${particles.length}`;
-    collisionCounter.innerText = `Collisions: ${number_of_collisions}`;
+    collisionCounter.innerText = `Collisions: ${numberOfCollisions}`;
   }
   requestAnimationFrame(animate);
 }
@@ -451,7 +443,6 @@ main_body.addEventListener("click", function (event) {
   event.stopPropagation();
   closeMenu();
 });
-initParticleShader();
 initializeGrid();
 drawGrid();
 

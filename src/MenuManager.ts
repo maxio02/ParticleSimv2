@@ -1,39 +1,33 @@
 import { drawGrid} from "./Drawer";
 import { setFieldSize, setFieldStrength, setGravityStrength, setSubsteps, setParticlesNum, setDrawOutline} from "./script";
 
-const menu_button = document.getElementById("menu-button");
-const menu_elements: NodeListOf<HTMLElement> =  document.querySelectorAll(".menu-element");
-export var particle_outline = 1;
-menu_button.addEventListener('click', function(event){
+const menuButton = document.getElementById("menu-button");
+const menuElements: NodeListOf<HTMLElement> =  document.querySelectorAll(".menu-element");
+export var drawParticleOutline = 1;
+menuButton.addEventListener('click', function(event){
     event.stopPropagation();
     openMenu();
 });
 
 const switchTheme = () => {
     const rootElem = document.documentElement
-    let theme = rootElem.getAttribute('theme'),
-      newTheme
-    newTheme = (theme === 'light') ? 'dark' : 'light'
+    let theme = rootElem.getAttribute('theme'), newTheme;
+    newTheme = (theme === 'light') ? 'dark' : 'light';
   
-    rootElem.setAttribute('theme', newTheme)
+    rootElem.setAttribute('theme', newTheme);
     drawGrid();
-    particle_outline = (particle_outline == 1) ? -1 : 1;
-    // updateColor();
+    drawParticleOutline = (drawParticleOutline == 1) ? -1 : 1;
   }
 
 
 document.querySelector('#theme-switch').addEventListener('click', switchTheme);
 
 export function openMenu() {
-    if (menu_button.getAttribute("open") == "false") {
-        // menu_button.removeEventListener('click', openMenu)
-        menu_button.setAttribute("open", "true");
-        menu_button.style.cursor = "auto";
-        // setTimeout(function () {
-        //     menu_elements.item(0).style.display= "inline-block";
-        // }, 300);
+    if (menuButton.getAttribute("open") == "false") {
+        menuButton.setAttribute("open", "true");
+        menuButton.style.cursor = "auto";
 
-        menu_elements.forEach(element => {
+        menuElements.forEach(element => {
             setTimeout(function () {
                 element.style.display = "block";
             }, 300);
@@ -46,44 +40,39 @@ export function openMenu() {
 }
 
 export function closeMenu() {
-    menu_button.setAttribute("open", "false");
-    menu_button.style.cursor = "pointer";
-    menu_elements.forEach(element => {
+    menuButton.setAttribute("open", "false");
+    menuButton.style.cursor = "pointer";
+    menuElements.forEach(element => {
         element.style.display = "none";
     });
 
 }
 
-var field_size_slider = document.getElementById("field-size-slider")  as HTMLInputElement;
-var field_strength_slider = document.getElementById("field-strength-slider")  as HTMLInputElement;
-var gravity_strength_slider = document.getElementById("gravity-strength-slider")  as HTMLInputElement;
-var substeps_amount_entry = document.getElementById("substeps-amount-entry") as HTMLInputElement;
-var particles_amount_entry = document.getElementById("particles-amount-entry") as HTMLInputElement;
-// var outline_checkbox = document.getElementById("drawOutline") as HTMLInputElement;
+var fieldSizeSlider = document.getElementById("field-size-slider")  as HTMLInputElement;
+var fieldStrengthSlider = document.getElementById("field-strength-slider")  as HTMLInputElement;
+var gravityStrengthSlider = document.getElementById("gravity-strength-slider")  as HTMLInputElement;
+var substepsAmountEntryBox = document.getElementById("substeps-amount-entry") as HTMLInputElement;
+var particlesAmountEntryBox = document.getElementById("particles-amount-entry") as HTMLInputElement;
 
-field_size_slider.oninput = function() {
-    setFieldSize(parseInt(field_size_slider.value));
+fieldSizeSlider.oninput = function() {
+    setFieldSize(parseInt(fieldSizeSlider.value));
   }
 
-field_strength_slider.oninput = function() {
-    setFieldStrength(parseInt(field_strength_slider.value));
+fieldStrengthSlider.oninput = function() {
+    setFieldStrength(parseInt(fieldStrengthSlider.value));
   }
 
-gravity_strength_slider.oninput = function() {
-    setGravityStrength(parseInt(gravity_strength_slider.value));
+gravityStrengthSlider.oninput = function() {
+    setGravityStrength(parseInt(gravityStrengthSlider.value));
   }
 
-substeps_amount_entry.addEventListener('change', function() {
-    setSubsteps(parseInt(substeps_amount_entry.value));
+substepsAmountEntryBox.addEventListener('change', function() {
+    setSubsteps(parseInt(substepsAmountEntryBox.value));
 });
 
-particles_amount_entry.addEventListener('change', function() {
-    setParticlesNum(parseInt(particles_amount_entry.value));
+particlesAmountEntryBox.addEventListener('change', function() {
+    setParticlesNum(parseInt(particlesAmountEntryBox.value));
 });
-
-// outline_checkbox.oninput = function() {
-//     setDrawOutline(outline_checkbox.checked)
-// }
 
 export function getPointerFunction() {
     var radioButtons = document.getElementsByName('cursor-function') as NodeListOf<HTMLInputElement>

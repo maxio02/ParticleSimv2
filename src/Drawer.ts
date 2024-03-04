@@ -3,9 +3,9 @@ import Vec2D from "./Vec2D";
 import particleFragmentShader from "./shaders/particleFragmentShader.frag";
 import particleVertexShader from "./shaders/particleVertexShader.vert";
 
-import { back_ctx, ctx, foreground_canvas, particles, gridSize, pointerPosition, fieldSize, clicked, drawOutline, gravity, fps, applyConstraint, applyAttractorForces, grid } from "./script";
-import { createProgram, createShader, initParticleShader, resizeCanvasToDisplaySize } from "./ShaderHelper";
-import { particle_outline } from "./MenuManager";
+import { backgroundCanvasCtx, foregroundCanvasCtx, foregroundCanvas, particles, gridSize, pointerPosition, fieldSize, clicked, drawOutline, gravity, fps, applyConstraint, applyAttractorForces, grid } from "./script";
+import { createProgram, createShader, resizeCanvasToDisplaySize } from "./ShaderHelper";
+import { drawParticleOutline } from "./MenuManager";
 
 
 var canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
@@ -85,10 +85,10 @@ export function drawParticles() {
   // Draw the rectangle.
   particles.forEach((particle) => {
       gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-      gl.uniform2f(translationLocation, particle.pos_curr.x, particle.pos_curr.y);
+      gl.uniform2f(translationLocation, particle.currentPosition.x, particle.currentPosition.y);
       gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
       gl.uniform1f(radiusUniformLocation, gridSize/2)
-      gl.uniform1f(outlineUniformLocation, particle_outline);
+      gl.uniform1f(outlineUniformLocation, drawParticleOutline);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
   });
 
@@ -96,21 +96,21 @@ export function drawParticles() {
 
 export function drawGrid() {
 
-  back_ctx.clearRect(0, 0, foreground_canvas.width, foreground_canvas.height);
+  backgroundCanvasCtx.clearRect(0, 0, foregroundCanvas.width, foregroundCanvas.height);
 
-  back_ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
-  back_ctx.lineWidth = 1;
-  for (let x = gridSize; x < foreground_canvas.width; x += gridSize) {
-    back_ctx.beginPath();
-    back_ctx.moveTo(x, 0);
-    back_ctx.lineTo(x, foreground_canvas.height);
-    back_ctx.stroke();
+  backgroundCanvasCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
+  backgroundCanvasCtx.lineWidth = 1;
+  for (let x = gridSize; x < foregroundCanvas.width; x += gridSize) {
+    backgroundCanvasCtx.beginPath();
+    backgroundCanvasCtx.moveTo(x, 0);
+    backgroundCanvasCtx.lineTo(x, foregroundCanvas.height);
+    backgroundCanvasCtx.stroke();
   }
-  for (let y = gridSize; y < foreground_canvas.height; y += gridSize) {
-    back_ctx.beginPath();
-    back_ctx.moveTo(0, y);
-    back_ctx.lineTo(foreground_canvas.width, y);
-    back_ctx.stroke();
+  for (let y = gridSize; y < foregroundCanvas.height; y += gridSize) {
+    backgroundCanvasCtx.beginPath();
+    backgroundCanvasCtx.moveTo(0, y);
+    backgroundCanvasCtx.lineTo(foregroundCanvas.width, y);
+    backgroundCanvasCtx.stroke();
   }
   //DEBUG
   //   for (let x = 0; x < grid.length; x += 1) {
@@ -157,7 +157,7 @@ function drawPredictedPath(startPos: Vec2D, vec: Vec2D) {
     predictedDot.updatePosition(0.5 * 0.25);
 
     if (i % 15 == 0) {
-      drawDot(predictedDot.pos_curr.x, predictedDot.pos_curr.y, 5, 255 - i / 2)
+      drawDot(predictedDot.currentPosition.x, predictedDot.currentPosition.y, 5, 255 - i / 2)
     }
 
   }
@@ -165,8 +165,8 @@ function drawPredictedPath(startPos: Vec2D, vec: Vec2D) {
 }
 
 export function drawDot(dotX: number, dotY: number, dotSize: number, opacity: number) {
-  ctx.beginPath();
-  ctx.arc(
+  foregroundCanvasCtx.beginPath();
+  foregroundCanvasCtx.arc(
     dotX,
     dotY,
     dotSize,
@@ -175,21 +175,21 @@ export function drawDot(dotX: number, dotY: number, dotSize: number, opacity: nu
     false
   );
 
-  ctx.fillStyle = `rgba(210, 210, 210, ${opacity / 255})`;
-  ctx.fill();
+  foregroundCanvasCtx.fillStyle = `rgba(210, 210, 210, ${opacity / 255})`;
+  foregroundCanvasCtx.fill();
 
-  ctx.closePath();
+  foregroundCanvasCtx.closePath();
 }
 
 export function drawLasso() {
   if (clicked) {
     const lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(pointerPosition.x, pointerPosition.y, fieldSize, 0, 2 * Math.PI);
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
-    ctx.stroke();
-    ctx.closePath();
+    foregroundCanvasCtx.beginPath();
+    foregroundCanvasCtx.arc(pointerPosition.x, pointerPosition.y, fieldSize, 0, 2 * Math.PI);
+    foregroundCanvasCtx.lineWidth = lineWidth;
+    foregroundCanvasCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
+    foregroundCanvasCtx.stroke();
+    foregroundCanvasCtx.closePath();
   }
 }
 export function drawArrow(from: Vec2D, to: Vec2D) {
@@ -205,31 +205,31 @@ export function drawArrow(from: Vec2D, to: Vec2D) {
 
 
     //starting path of the arrow from the start square to the end square and drawing the stroke
-    ctx.beginPath();
-    ctx.moveTo(from.x, from.y);
-    ctx.lineTo(new_to.x, new_to.y);
-    ctx.strokeStyle = "#bbbbbb";
-    ctx.lineWidth = width;
-    ctx.stroke();
+    foregroundCanvasCtx.beginPath();
+    foregroundCanvasCtx.moveTo(from.x, from.y);
+    foregroundCanvasCtx.lineTo(new_to.x, new_to.y);
+    foregroundCanvasCtx.strokeStyle = "#bbbbbb";
+    foregroundCanvasCtx.lineWidth = width;
+    foregroundCanvasCtx.stroke();
 
     //starting a new path from the head of the arrow to one of the sides of the point
-    ctx.beginPath();
-    ctx.moveTo(new_to.x, new_to.y);
-    ctx.lineTo(new_to.x - headlen * Math.cos(angle - Math.PI / 7), new_to.y - headlen * Math.sin(angle - Math.PI / 7));
+    foregroundCanvasCtx.beginPath();
+    foregroundCanvasCtx.moveTo(new_to.x, new_to.y);
+    foregroundCanvasCtx.lineTo(new_to.x - headlen * Math.cos(angle - Math.PI / 7), new_to.y - headlen * Math.sin(angle - Math.PI / 7));
 
     //path from the side point of the arrow, to the other side point
-    ctx.lineTo(new_to.x - headlen * Math.cos(angle + Math.PI / 7), new_to.y - headlen * Math.sin(angle + Math.PI / 7));
+    foregroundCanvasCtx.lineTo(new_to.x - headlen * Math.cos(angle + Math.PI / 7), new_to.y - headlen * Math.sin(angle + Math.PI / 7));
 
     //path from the side point back to the tip of the arrow, and then again to the opposite side point
-    ctx.lineTo(new_to.x, new_to.y);
-    ctx.lineTo(new_to.x - headlen * Math.cos(angle - Math.PI / 7), new_to.y - headlen * Math.sin(angle - Math.PI / 7));
+    foregroundCanvasCtx.lineTo(new_to.x, new_to.y);
+    foregroundCanvasCtx.lineTo(new_to.x - headlen * Math.cos(angle - Math.PI / 7), new_to.y - headlen * Math.sin(angle - Math.PI / 7));
 
     //draws the paths created above
-    ctx.strokeStyle = "#bbbbbb";
-    ctx.lineWidth = width;
-    ctx.stroke();
-    ctx.fillStyle = "#bbbbbb";
-    ctx.fill();
-    ctx.closePath();
+    foregroundCanvasCtx.strokeStyle = "#bbbbbb";
+    foregroundCanvasCtx.lineWidth = width;
+    foregroundCanvasCtx.stroke();
+    foregroundCanvasCtx.fillStyle = "#bbbbbb";
+    foregroundCanvasCtx.fill();
+    foregroundCanvasCtx.closePath();
   }
 }

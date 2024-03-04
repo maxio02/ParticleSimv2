@@ -4,7 +4,7 @@ import { fps } from "./script";
 export default class Attractor {
     static canvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
     static ctx = Attractor.canvas!.getContext('2d');
-    pos: Vec2D
+    position: Vec2D
     radius: number
     color: string
     dt: number = 0
@@ -13,7 +13,7 @@ export default class Attractor {
 
 
     constructor(pos: Vec2D, radius: number, force: number, attracts: boolean, color: string) {
-        this.pos = pos;
+        this.position = pos;
         this.radius = radius;
         this.color = color;
         this.attracts = attracts;
@@ -25,8 +25,8 @@ export default class Attractor {
         let i = 0;
         this.attracts ? i = 1 : i = 0
         this.attracts ? this.dt += 0.03*(60/fps) : this.dt -= 0.03*(60/fps)
-        let xpos: number = this.pos.x;
-        let ypos: number = this.pos.y;
+        let xpos: number = this.position.x;
+        let ypos: number = this.position.y;
         let ringsNum = 6
         Attractor.ctx.lineWidth = 2;
         

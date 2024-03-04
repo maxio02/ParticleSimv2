@@ -1,6 +1,3 @@
-import particleFragmentShader from "./shaders/particleFragmentShader.frag";
-import particleVertexShader from "./shaders/particleVertexShader.vert";
-
 export function createShader(gl: WebGLRenderingContext, type: any, source: any) {
     var shader = gl.createShader(type);
     gl.shaderSource(shader, source);
@@ -44,46 +41,5 @@ export function createShader(gl: WebGLRenderingContext, type: any, source: any) 
     }
    
     return needResize;
-
-  }
-
-
-  export function initParticleShader(){
-
-
-// var width = gl.canvas.width;
-// var height = gl.canvas.height;
-// var centerX = 200 / width;
-// var centerY = 200 / height;
-// console.log(width);
-// console.log(height);
-// console.log(centerX);
-// console.log(centerY);
-// var radius = Math.min(200, 200) / 2;
-// var normCenterX = centerX/2;
-// var normCenterY = centerY;
-// var normRadius = radius / width;
-// console.log(normRadius);
-// console.log(normCenterX);
-// console.log(normCenterY);
-
-
-
-// resizeCanvasToDisplaySize(gl.canvas);
-
-
-
-
-
-
-
-
-
-//setting the resolution
-// gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-// gl.uniform2f(gl.getUniformLocation(program, "u_center"), normCenterX, normCenterY);
-// gl.uniform1f(gl.getUniformLocation(program, "u_radius"), normRadius);
-
-
 
   }
