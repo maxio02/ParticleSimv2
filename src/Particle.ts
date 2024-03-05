@@ -46,9 +46,6 @@ export default class Particle {
     for (let i = this.cell.x - 1; i <= this.cell.x + 1; i++) {
       for (let j = this.cell.y - 1; j <= this.cell.y + 1; j++) {
         if (i >= 0 && i < this.grid.columns && j >= 0 && j < this.grid.rows) {
-          if(this.grid.cells[i]== null){
-            break;
-        }
           neighboringParticles.push(...this.grid.cells[i][j]);
         }
       }
