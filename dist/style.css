@@ -9,7 +9,7 @@
   --text-color: #000000;
   --menu-color: #999999;
   --menu-text-color: #ffffff;
-  --isOutlineDark: 1;
+  --is-outline-dark: -1;
 }
 
 
@@ -22,7 +22,7 @@
   --text-color: #ffffff;
   --menu-color: #575757;
   --menu-text-color: #000000;
-  --isOutlineDark: -1;
+  --is-outline-dark: 1;
 }
 
 

@@ -1,8 +1,7 @@
-import { drawGrid } from "./Renderer";
 import { grid } from "./script";
 
 export const foregroundCanvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
-const backgroundCanvas = document.getElementById('background-canvas') as HTMLCanvasElement;
+export const backgroundCanvas = document.getElementById('background-canvas') as HTMLCanvasElement;
 const webglCanvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
 
 foregroundCanvas!.width = foregroundCanvas.getBoundingClientRect().width;
@@ -28,6 +27,6 @@ export function updateCanvasSize() {
     webglCanvas.width = webglCanvas.getBoundingClientRect().width;
     webglCanvas.height = webglCanvas.getBoundingClientRect().height;
     grid.updateSize();
-    drawGrid();
+    grid.draw();
   }
   

@@ -1,6 +1,6 @@
 import * as Config from './Config';
-import { drawGrid } from "./Renderer";
 import Vec2D from "./Vec2D";
+import { grid } from './script';
 
 const menuButton = document.getElementById("menu-button");
 const menuElements: NodeListOf<HTMLElement> = document.querySelectorAll(".menu-element");
@@ -16,7 +16,7 @@ const switchTheme = () => {
   newTheme = (theme === 'light') ? 'dark' : 'light';
 
   rootElem.setAttribute('theme', newTheme);
-  drawGrid();
+  grid.draw();
 }
 
 

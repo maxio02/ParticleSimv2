@@ -40,7 +40,6 @@ var colorUniformLocation = gl.getUniformLocation(program, "u_color");
 var translationLocation = gl.getUniformLocation(program, "u_translation");
 var radiusUniformLocation = gl.getUniformLocation(program, "u_radius");
 var outlineUniformLocation = gl.getUniformLocation(program, "u_outline_black");
-gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 var positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
@@ -49,11 +48,6 @@ function setRectangle(gl: WebGLRenderingContext, x:number, y:number, width:numbe
   var x2 = x + width / 2;
   var y1 = y - height / 2;
   var y2 = y + height / 2;
- 
-  // NOTE: gl.bufferData(gl.ARRAY_BUFFER, ...) will affect
-  // whatever buffer is bound to the `ARRAY_BUFFER` bind point
-  // but so far we only have one buffer. If we had more than one
-  // buffer we'd want to bind that buffer to `ARRAY_BUFFER` first.
  
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
      x1, y1,
@@ -95,40 +89,10 @@ export function drawParticles() {
       gl.uniform2f(translationLocation, particle.currentPosition.x, particle.currentPosition.y);
       gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
       gl.uniform1f(radiusUniformLocation, Config.getGridSize()/2)
-      gl.uniform1f(outlineUniformLocation, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-color')));
+      gl.uniform1f(outlineUniformLocation, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--is-outline-dark')));
       gl.drawArrays(gl.TRIANGLES, 0, 6);
   });
 
-}
-
-export function drawGrid() {
-
-  backgroundCanvasCtx.clearRect(0, 0, foregroundCanvas.width, foregroundCanvas.height);
-
-  backgroundCanvasCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
-  backgroundCanvasCtx.lineWidth = 1;
-  for (let x = Config.getGridSize(); x < foregroundCanvas.width; x += Config.getGridSize()) {
-    backgroundCanvasCtx.beginPath();
-    backgroundCanvasCtx.moveTo(x, 0);
-    backgroundCanvasCtx.lineTo(x, foregroundCanvas.height);
-    backgroundCanvasCtx.stroke();
-  }
-  for (let y = Config.getGridSize(); y < foregroundCanvas.height; y += Config.getGridSize()) {
-    backgroundCanvasCtx.beginPath();
-    backgroundCanvasCtx.moveTo(0, y);
-    backgroundCanvasCtx.lineTo(foregroundCanvas.width, y);
-    backgroundCanvasCtx.stroke();
-  }
-  //DEBUG
-  //   for (let x = 0; x < grid.length; x += 1) {
-
-  //   for (let y = 0; y < grid[0].length; y += 1) {
-  //     back_ctx.font = "12px serif";
-
-  //     back_ctx.fillText(`${grid[x][y].length}`, (x+1)*Config.getGridSize() - Config.getGridSize()/2 - 2, (y+1)*Config.getGridSize() -Config.getGridSize()/2 + 4);
-  //     // back_ctx.fillText(`${x} ${y}`, (x+1)*Config.getGridSize() - Config.getGridSize()/2 - 2, (y+1)*Config.getGridSize() -Config.getGridSize()/2 + 4);
-  //   }
-  // }
 }
 
 function drawAttractors(attractors: Attractor[]) {

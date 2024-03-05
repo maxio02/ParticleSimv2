@@ -19,7 +19,7 @@ export default class Particle {
     this.acceleration = acc;
     this.color = color;
     this.grid = grid;
-    this.cell = new Vec2D(Math.floor(this.currentPosition.x / grid.gridPixelSize), Math.floor(this.currentPosition.y / grid.gridPixelSize));
+    this.cell = new Vec2D(Math.floor(this.currentPosition.x / grid.pixelSize), Math.floor(this.currentPosition.y / grid.pixelSize));
   }
 
   updatePosition(dt: number) {
@@ -32,6 +32,7 @@ export default class Particle {
 
     this.acceleration.x = 0;
     this.acceleration.y = 0;
+    this.updateCell();
   }
 
   accelerate(acc: Vec2D) {
@@ -52,6 +53,9 @@ export default class Particle {
     return neighboringParticles;
   }
   
+  updateCell(){
+    this.cell = new Vec2D(Math.floor(this.currentPosition.x / this.grid.pixelSize), Math.floor(this.currentPosition.y / this.grid.pixelSize));
+  }
 
 
 

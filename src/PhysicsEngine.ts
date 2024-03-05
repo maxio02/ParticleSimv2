@@ -150,18 +150,18 @@ function updatePositions(dt: number) {
   
     particles.forEach((particle1) => {
       const neighboringParticles = particle1.getNeighboringParticles();
-  
       neighboringParticles.forEach((particle2) => {
         if (particle1 === particle2) return;
   
         tempCollisionDirection.set(particle1.currentPosition).subtract(particle2.currentPosition);
         squaredDistance = tempCollisionDirection.squaredLength();
-  
+        
         radiiSum = particle1.radius + particle2.radius;
         squaredRadiiSum = radiiSum * radiiSum;
   
         if (squaredDistance < squaredRadiiSum && squaredDistance != 0) {
           numberOfCollisions++;
+          
             let distance = Math.sqrt(squaredDistance);
             tempCollisionDirection.divide(distance);
         
@@ -173,5 +173,6 @@ function updatePositions(dt: number) {
         }
       });
     });
+    // console.log(numberOfCollisions);
   }
   
