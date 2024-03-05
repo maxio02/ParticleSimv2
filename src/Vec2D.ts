@@ -10,6 +10,7 @@ export default class Vec2D {
     add(other: Vec2D){
       this.x += other.x;
       this.y += other.y;
+      return this;
     }
 
     set(other: Vec2D){
@@ -21,16 +22,19 @@ export default class Vec2D {
     subtract(other: Vec2D){
       this.x -= other.x;
       this.y -= other.y;
+      return this;
     }
   
     multiply(scalar: number) {
       this.x *= scalar;
       this.y *= scalar;
+      return this;
     }
   
     divide(scalar: number){
       this.x /= scalar;
       this.y /= scalar;
+      return this;
     }
   
     dot(vec: Vec2D): number {

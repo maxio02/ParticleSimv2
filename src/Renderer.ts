@@ -1,15 +1,22 @@
-import Particle from "./Particle";
 import Vec2D from "./Vec2D";
+import * as Config from './Config';
 import particleFragmentShader from "./shaders/particleFragmentShader.frag";
 import particleVertexShader from "./shaders/particleVertexShader.vert";
-
-import { backgroundCanvasCtx, foregroundCanvasCtx, foregroundCanvas, particles, gridSize, pointerPosition, fieldSize, clicked, drawOutline, gravity, fps, applyConstraint, applyAttractorForces, grid } from "./script";
 import { createProgram, createShader, resizeCanvasToDisplaySize } from "./ShaderHelper";
-import { drawParticleOutline } from "./MenuManager";
+import Attractor from "./Attractor";
+import { backgroundCanvasCtx, foregroundCanvas, foregroundCanvasCtx } from "./CanvasManager";
+import { applyAttractorForces, applyConstraint } from "./PhysicsEngine";
+import { InputHandler } from "./InputHandler";
+import { grid, particles } from "./script";
+import Particle from "./Particle";
 
 
-var canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
-var gl = canvas.getContext("webgl");
+var webglCanvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
+var gl = webglCanvas.getContext("webgl");
+webglCanvas!.width = webglCanvas.getBoundingClientRect().width;
+webglCanvas!.height = webglCanvas.getBoundingClientRect().height;
+
+const inputHandler = InputHandler.getInstance();
 
 if (!gl) {
   console.error("Unable to initialize WebGL. Your browser may not support it.");
@@ -60,7 +67,7 @@ function setRectangle(gl: WebGLRenderingContext, x:number, y:number, width:numbe
 export function setGeometry(){
   particles.forEach((particle) => {
     setRectangle(
-      gl, 0, 0, gridSize, gridSize);
+      gl, 0, 0, Config.getGridSize(), Config.getGridSize());
   });
 
 }
@@ -87,8 +94,8 @@ export function drawParticles() {
       gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
       gl.uniform2f(translationLocation, particle.currentPosition.x, particle.currentPosition.y);
       gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
-      gl.uniform1f(radiusUniformLocation, gridSize/2)
-      gl.uniform1f(outlineUniformLocation, drawParticleOutline);
+      gl.uniform1f(radiusUniformLocation, Config.getGridSize()/2)
+      gl.uniform1f(outlineUniformLocation, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-color')));
       gl.drawArrays(gl.TRIANGLES, 0, 6);
   });
 
@@ -100,13 +107,13 @@ export function drawGrid() {
 
   backgroundCanvasCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
   backgroundCanvasCtx.lineWidth = 1;
-  for (let x = gridSize; x < foregroundCanvas.width; x += gridSize) {
+  for (let x = Config.getGridSize(); x < foregroundCanvas.width; x += Config.getGridSize()) {
     backgroundCanvasCtx.beginPath();
     backgroundCanvasCtx.moveTo(x, 0);
     backgroundCanvasCtx.lineTo(x, foregroundCanvas.height);
     backgroundCanvasCtx.stroke();
   }
-  for (let y = gridSize; y < foregroundCanvas.height; y += gridSize) {
+  for (let y = Config.getGridSize(); y < foregroundCanvas.height; y += Config.getGridSize()) {
     backgroundCanvasCtx.beginPath();
     backgroundCanvasCtx.moveTo(0, y);
     backgroundCanvasCtx.lineTo(foregroundCanvas.width, y);
@@ -118,16 +125,21 @@ export function drawGrid() {
   //   for (let y = 0; y < grid[0].length; y += 1) {
   //     back_ctx.font = "12px serif";
 
-  //     back_ctx.fillText(`${grid[x][y].length}`, (x+1)*gridSize - gridSize/2 - 2, (y+1)*gridSize -gridSize/2 + 4);
-  //     // back_ctx.fillText(`${x} ${y}`, (x+1)*gridSize - gridSize/2 - 2, (y+1)*gridSize -gridSize/2 + 4);
+  //     back_ctx.fillText(`${grid[x][y].length}`, (x+1)*Config.getGridSize() - Config.getGridSize()/2 - 2, (y+1)*Config.getGridSize() -Config.getGridSize()/2 + 4);
+  //     // back_ctx.fillText(`${x} ${y}`, (x+1)*Config.getGridSize() - Config.getGridSize()/2 - 2, (y+1)*Config.getGridSize() -Config.getGridSize()/2 + 4);
   //   }
   // }
 }
 
-export function drawTail(from: Vec2D, to: Vec2D) {
-  if (clicked && from.x != to.x && from.y != to.y) {
-    const dotSize = 5;
-    const dotCount = 8;
+function drawAttractors(attractors: Attractor[]) {
+  attractors.forEach((attractor) => {
+    attractor.animate();
+  });
+}
+
+
+export function drawDottedLine(from: Vec2D, to: Vec2D, radius: number = 5, dotCount: number = 8) {
+  if (inputHandler.clicked && from.x != to.x && from.y != to.y) {
     const distance = from.difference(to);
     drawPredictedPath(from.clone(), distance.clone())
     distance.divide(dotCount);
@@ -140,18 +152,18 @@ export function drawTail(from: Vec2D, to: Vec2D) {
     for (let i = 0; i <= dotCount; i++) {
       var dotX = from.x - distance.x * i;
       var dotY = from.y - distance.y * i;
-      drawDot(dotX, dotY, dotSize, 255);
+      drawDot(dotX, dotY, radius, 255);
     }
 
   }
 }
 
-function drawPredictedPath(startPos: Vec2D, vec: Vec2D) {
+export function drawPredictedPath(startPos: Vec2D, AccelerationVector: Vec2D) {
   let dotCount = 510;
-  let predictedDot = new Particle(startPos, 15, vec, {r:0, g:0, b:0})
+  let predictedDot = new Particle(startPos, 15, AccelerationVector, {r:0, g:0, b:0},grid)
   for (let i = 1; i <= dotCount; i++) {
 
-    predictedDot.accelerate(gravity);
+    predictedDot.accelerate(Config.getGravityDirection());
     applyConstraint(predictedDot);
     applyAttractorForces(predictedDot);
     predictedDot.updatePosition(0.5 * 0.25);
@@ -181,19 +193,19 @@ export function drawDot(dotX: number, dotY: number, dotSize: number, opacity: nu
   foregroundCanvasCtx.closePath();
 }
 
-export function drawLasso() {
-  if (clicked) {
-    const lineWidth = 3;
+export function drawLasso(lineWidth: number = 3) {
+  if (inputHandler.clicked) {
     foregroundCanvasCtx.beginPath();
-    foregroundCanvasCtx.arc(pointerPosition.x, pointerPosition.y, fieldSize, 0, 2 * Math.PI);
+    foregroundCanvasCtx.arc(inputHandler.pointerPosition.x, inputHandler.pointerPosition.y, Config.getFieldSize(), 0, 2 * Math.PI);
     foregroundCanvasCtx.lineWidth = lineWidth;
     foregroundCanvasCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-color');
     foregroundCanvasCtx.stroke();
     foregroundCanvasCtx.closePath();
   }
 }
+
 export function drawArrow(from: Vec2D, to: Vec2D) {
-  if (clicked && from.x != to.x && from.y != to.y) {
+  if (inputHandler.clicked && from.x != to.x && from.y != to.y) {
     var angle = Math.atan2(to.y - from.y, to.x - from.x);
     const width = 10;
     var headlen = 10;
@@ -232,4 +244,19 @@ export function drawArrow(from: Vec2D, to: Vec2D) {
     foregroundCanvasCtx.fill();
     foregroundCanvasCtx.closePath();
   }
+}
+
+function drawCursorFunction() {
+switch (Config.getPointerFunction()) {
+  case 'field':
+    drawLasso();
+    break;
+  case 'gravity':
+    drawArrow(inputHandler.clickStartPosition, inputHandler.pointerPosition)
+    break;
+  case 'throw':
+    drawDottedLine(inputHandler.clickStartPosition, inputHandler.pointerPosition)
+    break;
+
+}
 }

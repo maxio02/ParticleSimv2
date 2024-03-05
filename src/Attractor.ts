@@ -1,6 +1,5 @@
+import { fps } from "./UIManager";
 import Vec2D from "./Vec2D"
-import { fps } from "./script";
-
 export default class Attractor {
     static canvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
     static ctx = Attractor.canvas!.getContext('2d');
@@ -23,11 +22,11 @@ export default class Attractor {
 
     animate() {
         let i = 0;
-        this.attracts ? i = 1 : i = 0
+        this.attracts ? i = 1 : i = 0;
         this.attracts ? this.dt += 0.03*(60/fps) : this.dt -= 0.03*(60/fps)
         let xpos: number = this.position.x;
         let ypos: number = this.position.y;
-        let ringsNum = 6
+        let ringsNum = 6;
         Attractor.ctx.lineWidth = 2;
         
         for(i; i <= ringsNum; i++)
