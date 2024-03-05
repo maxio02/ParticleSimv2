@@ -9,6 +9,7 @@ import { applyAttractorForces, applyConstraint } from "./PhysicsEngine";
 import { InputHandler } from "./InputHandler";
 import { grid, particles } from "./script";
 import Particle from "./Particle";
+import { getAverageFrameTime } from "./UIManager";
 
 
 var webglCanvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
@@ -124,16 +125,16 @@ export function drawDottedLine(from: Vec2D, to: Vec2D, radius: number = 5, dotCo
 }
 
 export function drawPredictedPath(startPos: Vec2D, AccelerationVector: Vec2D) {
-  let dotCount = 255;
+  let dotCount = 127;
   let predictedDot = new Particle(startPos, Config.getGridSize()/2, AccelerationVector, {r:0, g:0, b:0},grid)
   for (let i = 1; i <= dotCount; i++) {
 
     predictedDot.accelerate(Config.getGravityDirection());
     applyConstraint(predictedDot);
     applyAttractorForces(predictedDot);
-    predictedDot.updatePosition(0.8 * 0.25);
-    if (i % 6 == 0) {
-      drawDot(predictedDot.currentPosition.x, predictedDot.currentPosition.y, 5, 255 - i)
+    predictedDot.updatePosition(getAverageFrameTime()/20);
+    if (i % 3 == 0) {
+      drawDot(predictedDot.currentPosition.x, predictedDot.currentPosition.y, 5, 255 - i*2)
     }
 
   }

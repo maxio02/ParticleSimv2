@@ -3,7 +3,7 @@ import Vec2D from "./Vec2D";
 
 var fieldStrength = 10;
 var physicsSubstepsAmount = 4;
-var gravityDirection = new Vec2D(0, 1);
+var gravityDirection = new Vec2D(0, 1.3);
 var fieldSize = 100;
 var particleNumber = 200;
 var pointerFunction: PointerFunctionType = 'field';

@@ -7,7 +7,7 @@ export class Grid {
     public columns: number;
     public rows: number;
     public readonly pixelSize: number;
-    private canvas: HTMLCanvasElement;
+    public canvas: HTMLCanvasElement;
     private canvasCtx: CanvasRenderingContext2D;
     constructor(canvas: HTMLCanvasElement, gridPixelSize: number = Config.getGridSize()) {
         this.pixelSize = gridPixelSize;

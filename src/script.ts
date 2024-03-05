@@ -18,7 +18,7 @@ export let grid = new Grid(backgroundCanvas);
 
 function animate() {
   let frameTime = getAverageFrameTime()
-  tick(frameTime/25);
+  tick(frameTime/20);
 
   clearCanvas();
   drawParticles();

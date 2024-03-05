@@ -65,8 +65,8 @@ export class InputHandler {
     event.stopPropagation();
     this.clicked = false;
     if(Config.getPointerFunction() == 'throw'){
-      let launch_dir = this.clickStartPosition.difference(this.pointerPosition)
-    launch_dir.multiply(fps / 60)
+      let launch_dir = this.clickStartPosition.clone().difference(this.pointerPosition)
+    launch_dir.multiply(fps / 15)
     particles.push(new Particle(this.clickStartPosition.clone(), Config.getGridSize()/2, launch_dir, getRandomColor(), grid));
     }
   }

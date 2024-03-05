@@ -27,6 +27,7 @@ export function updateCanvasSize() {
     backgroundCanvas.height = backgroundCanvas.getBoundingClientRect().height;
     webglCanvas.width = webglCanvas.getBoundingClientRect().width;
     webglCanvas.height = webglCanvas.getBoundingClientRect().height;
+    grid.canvas = backgroundCanvas;
     grid.updateSize();
     grid.draw();
   }
