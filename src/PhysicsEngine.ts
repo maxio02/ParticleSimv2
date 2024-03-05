@@ -55,7 +55,7 @@ function updatePositions(dt: number) {
             applyField(inputHandler.pointerPosition);
             break;
           case 'gravity':
-            Config.setGravityDirection(inputHandler.pointerPosition.difference(inputHandler.clickStartPosition).divide(200));
+            Config.setGravityDirection(inputHandler.pointerPosition.difference(inputHandler.clickStartPosition).divide(400));
           case 'throw':
             break;
   

@@ -82,14 +82,15 @@ export function drawParticles() {
 
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-
+  var outlineColor = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--is-outline-dark'));
+  var resolution = [gl.canvas.width, gl.canvas.height]
   // Draw the rectangle.
   particles.forEach((particle) => {
-      gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+      gl.uniform2fv(resolutionUniformLocation, resolution);
       gl.uniform2f(translationLocation, particle.currentPosition.x, particle.currentPosition.y);
       gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
-      gl.uniform1f(radiusUniformLocation, Config.getGridSize()/2)
-      gl.uniform1f(outlineUniformLocation, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--is-outline-dark')));
+      gl.uniform1f(radiusUniformLocation, particle.radius)
+      gl.uniform1f(outlineUniformLocation, outlineColor);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
   });
 
@@ -123,17 +124,16 @@ export function drawDottedLine(from: Vec2D, to: Vec2D, radius: number = 5, dotCo
 }
 
 export function drawPredictedPath(startPos: Vec2D, AccelerationVector: Vec2D) {
-  let dotCount = 510;
-  let predictedDot = new Particle(startPos, 15, AccelerationVector, {r:0, g:0, b:0},grid)
+  let dotCount = 255;
+  let predictedDot = new Particle(startPos, Config.getGridSize()/2, AccelerationVector, {r:0, g:0, b:0},grid)
   for (let i = 1; i <= dotCount; i++) {
 
     predictedDot.accelerate(Config.getGravityDirection());
     applyConstraint(predictedDot);
     applyAttractorForces(predictedDot);
-    predictedDot.updatePosition(0.5 * 0.25);
-
-    if (i % 15 == 0) {
-      drawDot(predictedDot.currentPosition.x, predictedDot.currentPosition.y, 5, 255 - i / 2)
+    predictedDot.updatePosition(0.8 * 0.25);
+    if (i % 6 == 0) {
+      drawDot(predictedDot.currentPosition.x, predictedDot.currentPosition.y, 5, 255 - i)
     }
 
   }
@@ -210,7 +210,8 @@ export function drawArrow(from: Vec2D, to: Vec2D) {
   }
 }
 
-function drawCursorFunction() {
+export function drawCursorFunction() {
+  if (inputHandler.clicked) {
 switch (Config.getPointerFunction()) {
   case 'field':
     drawLasso();
@@ -221,6 +222,6 @@ switch (Config.getPointerFunction()) {
   case 'throw':
     drawDottedLine(inputHandler.clickStartPosition, inputHandler.pointerPosition)
     break;
-
 }
+  }
 }

@@ -1,6 +1,7 @@
 import * as Config from './Config';
+import { PointerFunctionType } from './InputHandler';
 import Vec2D from "./Vec2D";
-import { grid } from './script';
+import { grid, particles } from './script';
 
 const menuButton = document.getElementById("menu-button");
 const menuElements: NodeListOf<HTMLElement> = document.querySelectorAll(".menu-element");
@@ -54,6 +55,16 @@ var gravityStrengthSlider = document.getElementById("gravity-strength-slider") a
 var substepsAmountEntryBox = document.getElementById("substeps-amount-entry") as HTMLInputElement;
 var particlesAmountEntryBox = document.getElementById("particles-amount-entry") as HTMLInputElement;
 
+const radioButtons = document.getElementsByName('cursor-function') as NodeListOf<HTMLInputElement>;
+
+  radioButtons.forEach(radioButton => {
+    radioButton.addEventListener('change', () => {
+      if (radioButton.checked) {
+        Config.setPointerFunction(radioButton.value as PointerFunctionType);
+      }
+    });
+  });
+
 fieldSizeSlider.oninput = function () {
   Config.setFieldSize(parseInt(fieldSizeSlider.value));
 }
@@ -72,6 +83,11 @@ substepsAmountEntryBox.addEventListener('change', function () {
 
 particlesAmountEntryBox.addEventListener('change', function () {
   Config.setParticleNumber(parseInt(particlesAmountEntryBox.value));
+  let diff = particles.length - Config.getParticleNumber();
+  while( diff > 0){
+   particles.pop();
+   diff--;
+  }
 });
 
 

@@ -1,5 +1,10 @@
 import Vec2D from "./Vec2D";
-
+import * as Config from './Config';
+import { closeMenu, updatePointerFunction } from "./MenuManager";
+import { fps } from "./UIManager";
+import { grid, particles } from "./script";
+import { getRandomColor } from "./Utils";
+import Particle from "./Particle";
 export type PointerFunctionType = 'field' | 'gravity' | 'throw';
 
 export class InputHandler {
@@ -34,12 +39,14 @@ export class InputHandler {
     main_body.addEventListener("touchmove", this.handleMoveEvent.bind(this));
     main_body.addEventListener("click", (event) => {
       event.stopPropagation();
+      closeMenu();
     });
   }
 
   private handleMouseDown(event: MouseEvent | TouchEvent): void {
     event.stopPropagation();
     this.clicked = true;
+    
 
     if (event instanceof MouseEvent) {
       this.pointerPosition.x = event.clientX;
@@ -57,6 +64,11 @@ export class InputHandler {
   private handleMouseUp(event: MouseEvent | TouchEvent): void {
     event.stopPropagation();
     this.clicked = false;
+    if(Config.getPointerFunction() == 'throw'){
+      let launch_dir = this.clickStartPosition.difference(this.pointerPosition)
+    launch_dir.multiply(fps / 60)
+    particles.push(new Particle(this.clickStartPosition.clone(), Config.getGridSize()/2, launch_dir, getRandomColor(), grid));
+    }
   }
 
   private handleMoveEvent(event: MouseEvent | TouchEvent): void {

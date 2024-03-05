@@ -1,7 +1,7 @@
 import { backgroundCanvasCtx } from "./CanvasManager";
 import Particle from "./Particle";
 import { grid } from "./script";
-
+import * as Config from './Config';
 export class Grid {
     public cells: Particle[][][];
     public columns: number;
@@ -9,7 +9,7 @@ export class Grid {
     public readonly pixelSize: number;
     private canvas: HTMLCanvasElement;
     private canvasCtx: CanvasRenderingContext2D;
-    constructor(canvas: HTMLCanvasElement, gridPixelSize: number = 30) {
+    constructor(canvas: HTMLCanvasElement, gridPixelSize: number = Config.getGridSize()) {
         this.pixelSize = gridPixelSize;
         this.canvas = canvas;
         this.columns = Math.ceil(this.canvas.width / this.pixelSize);
@@ -32,6 +32,9 @@ export class Grid {
     public removeAll(): void {
         for (let i = 0; i < this.columns; i++) {
             for (let j = 0; j < this.rows; j++) {
+                if(this.cells[i]== null){
+                    break;
+                }
                 this.cells[i][j] = [];
             }
         }

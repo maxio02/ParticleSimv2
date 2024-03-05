@@ -8,7 +8,8 @@ foregroundCanvas!.width = foregroundCanvas.getBoundingClientRect().width;
 foregroundCanvas!.height = foregroundCanvas.getBoundingClientRect().height;
 backgroundCanvas!.width = backgroundCanvas.getBoundingClientRect().width;
 backgroundCanvas!.height = backgroundCanvas.getBoundingClientRect().height;
-
+webglCanvas.width = webglCanvas.getBoundingClientRect().width;
+webglCanvas.height = webglCanvas.getBoundingClientRect().height;
 export const foregroundCanvasCtx = foregroundCanvas.getContext('2d');
 export const backgroundCanvasCtx = backgroundCanvas.getContext('2d');
 

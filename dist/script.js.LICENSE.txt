@@ -6,6 +6,8 @@
 
 /*! ./InputHandler */
 
+/*! ./MenuManager */
+
 /*! ./Particle */
 
 /*! ./PhysicsEngine */
