@@ -103,11 +103,10 @@ function toggleGyro(){
     window.addEventListener('devicemotion', handleMotion, true);
   }
   else {
-    Config.setIsGyroEnabled(false);
     window.removeEventListener('devicemotion', handleMotion);
-    Config.setGravityDirection(new Vec2D(0, 1.3))
+    Config.setIsGyroEnabled(false);
+    Config.setGravityDirection(new Vec2D(0, 1.3));
   }
-  console.log(Config.isGyroEnabled());
 }
 
 particlesAmountEntryBox.addEventListener('change', function () {
@@ -121,9 +120,8 @@ particlesAmountEntryBox.addEventListener('change', function () {
 
 
 function handleMotion(event: DeviceMotionEvent): void {
-    
   if(Config.isGyroEnabled()){
-  Config.setGravityDirection(new Vec2D(event.accelerationIncludingGravity.x/10,-event.accelerationIncludingGravity.y/10));
+  Config.setGravityDirection(new Vec2D(event.accelerationIncludingGravity.x/5,-event.accelerationIncludingGravity.y/5));
   }
 }
 

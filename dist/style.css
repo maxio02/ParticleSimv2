@@ -239,12 +239,13 @@ canvas{
 
   .show{display: block;}
 
-  #gyro-toggle {
-    display: none;
-}
+  .mobile-only{
+    display: none !important;
+  }
 
 @media (max-width: 768px) {
-    #gyro-toggle {
-        display: block;
+    .mobile-only{
+      display: block !important;
     }
 }
+
