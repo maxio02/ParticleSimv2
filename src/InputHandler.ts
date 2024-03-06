@@ -41,7 +41,7 @@ export class InputHandler {
       event.stopPropagation();
       closeMenu();
     });
-    window.addEventListener('deviceorientation', this.handleOrientation);
+    window.addEventListener('devicemotion', this.handleOrientation);
   }
 
   private handleMouseDown(event: MouseEvent | TouchEvent): void {
@@ -85,13 +85,11 @@ export class InputHandler {
     }
   }
 
-  private handleOrientation(event: DeviceOrientationEvent): void {
-    const alpha = event.alpha; // Z-axis rotation [0,360)
-    const beta = event.beta; // X-axis rotation [-180,180)
-    const gamma = event.gamma; // Y-axis rotation [-90,90)
-
+  private handleOrientation(event: DeviceMotionEvent): void {
+    
+    console.log(event.accelerationIncludingGravity.x);
     if(Config.isGyroEnabled()){
-    Config.setGravityDirection(new Vec2D(gamma/100, beta/100));
+    Config.setGravityDirection(new Vec2D(event.accelerationIncludingGravity.x/100, event.accelerationIncludingGravity.y/100));
     }
   }
 
