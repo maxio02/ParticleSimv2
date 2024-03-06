@@ -142,7 +142,7 @@ canvas{
     font-size: 16px;
     cursor: pointer;
     border-radius: 16px;
-    height: 430px;
+    height: 460px;
     width: 200px;
     position: absolute;
     top: 10px;
@@ -238,3 +238,13 @@ canvas{
   }
 
   .show{display: block;}
+
+  #gyro-toggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #gyro-toggle {
+        display: block;
+    }
+}

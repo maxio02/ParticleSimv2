@@ -54,6 +54,7 @@ var fieldStrengthSlider = document.getElementById("field-strength-slider") as HT
 var gravityStrengthSlider = document.getElementById("gravity-strength-slider") as HTMLInputElement;
 var substepsAmountEntryBox = document.getElementById("substeps-amount-entry") as HTMLInputElement;
 var particlesAmountEntryBox = document.getElementById("particles-amount-entry") as HTMLInputElement;
+var gyroEnabledCheckBox = document.getElementById("gyro-toggle") as HTMLInputElement;
 
 const radioButtons = document.getElementsByName('cursor-function') as NodeListOf<HTMLInputElement>;
 
@@ -81,6 +82,31 @@ substepsAmountEntryBox.addEventListener('change', function () {
   Config.setPhysicsSubstepsAmount(parseInt(substepsAmountEntryBox.value));
 });
 
+gyroEnabledCheckBox.oninput = function () {
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+    (DeviceOrientationEvent as any).requestPermission().then((response: string) => {
+        if (response == 'granted') {
+            toggleGyro();
+        }
+    }).catch(console.error);
+} else {
+    toggleGyro();
+}
+
+
+
+}
+
+function toggleGyro(){
+  if (gyroEnabledCheckBox.checked) {
+    Config.setIsGyroEnabled(true);
+  }
+  else {
+    Config.setIsGyroEnabled(false);
+  }
+  console.log(Config.isGyroEnabled());
+}
+
 particlesAmountEntryBox.addEventListener('change', function () {
   Config.setParticleNumber(parseInt(particlesAmountEntryBox.value));
   let diff = particles.length - Config.getParticleNumber();
@@ -89,6 +115,8 @@ particlesAmountEntryBox.addEventListener('change', function () {
    diff--;
   }
 });
+
+
 
 
 export function updatePointerFunction() {

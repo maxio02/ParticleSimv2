@@ -8,6 +8,7 @@ var fieldSize = 100;
 var particleNumber = 200;
 var pointerFunction: PointerFunctionType = 'field';
 var gridSize = 26;
+var gyroEnabled = false;
 export function getGravityDirection() {
     return gravityDirection;
 }
@@ -36,6 +37,9 @@ export function getGridSize() {
     return gridSize;    
 }
 
+export function isGyroEnabled() {
+    return gyroEnabled;
+}
 
 export function setGravityDirection(newGravityDirection: Vec2D) {
     gravityDirection = newGravityDirection;
@@ -59,4 +63,8 @@ export function setParticleNumber(newParticleNumber: number) {
 
 export function setPointerFunction(newPointerFunction: PointerFunctionType) {
     pointerFunction = newPointerFunction;
+}
+
+export function setIsGyroEnabled(newIsGyroEnabled: boolean) {
+    gyroEnabled = newIsGyroEnabled;
 }
