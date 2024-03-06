@@ -83,8 +83,8 @@ substepsAmountEntryBox.addEventListener('change', function () {
 });
 
 gyroEnabledCheckBox.oninput = function () {
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-    (DeviceOrientationEvent as any).requestPermission().then((response: string) => {
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+    (DeviceMotionEvent as any).requestPermission().then((response: string) => {
         if (response == 'granted') {
             toggleGyro();
         }
@@ -100,9 +100,11 @@ gyroEnabledCheckBox.oninput = function () {
 function toggleGyro(){
   if (gyroEnabledCheckBox.checked) {
     Config.setIsGyroEnabled(true);
+    window.addEventListener('devicemotion', handleMotion, true);
   }
   else {
     Config.setIsGyroEnabled(false);
+    window.removeEventListener('devicemotion', handleMotion);
   }
   console.log(Config.isGyroEnabled());
 }
@@ -117,6 +119,12 @@ particlesAmountEntryBox.addEventListener('change', function () {
 });
 
 
+function handleMotion(event: DeviceMotionEvent): void {
+    
+  if(Config.isGyroEnabled()){
+  Config.setGravityDirection(new Vec2D(-event.accelerationIncludingGravity.x/20, event.accelerationIncludingGravity.y/20));
+  }
+}
 
 
 export function updatePointerFunction() {

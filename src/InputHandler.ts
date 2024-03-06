@@ -41,7 +41,6 @@ export class InputHandler {
       event.stopPropagation();
       closeMenu();
     });
-    window.addEventListener('devicemotion', this.handleOrientation);
   }
 
   private handleMouseDown(event: MouseEvent | TouchEvent): void {
@@ -85,13 +84,6 @@ export class InputHandler {
     }
   }
 
-  private handleOrientation(event: DeviceMotionEvent): void {
-    
-    console.log(event.accelerationIncludingGravity.x);
-    if(Config.isGyroEnabled()){
-    Config.setGravityDirection(new Vec2D(event.accelerationIncludingGravity.x/100, event.accelerationIncludingGravity.y/100));
-    }
-  }
 
 
 }
