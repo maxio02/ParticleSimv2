@@ -105,6 +105,7 @@ function toggleGyro(){
   else {
     Config.setIsGyroEnabled(false);
     window.removeEventListener('devicemotion', handleMotion);
+    Config.setGravityDirection(new Vec2D(0, 1.3))
   }
   console.log(Config.isGyroEnabled());
 }
@@ -122,7 +123,7 @@ particlesAmountEntryBox.addEventListener('change', function () {
 function handleMotion(event: DeviceMotionEvent): void {
     
   if(Config.isGyroEnabled()){
-  Config.setGravityDirection(new Vec2D(-event.accelerationIncludingGravity.x/20, event.accelerationIncludingGravity.y/20));
+  Config.setGravityDirection(new Vec2D(event.accelerationIncludingGravity.x/10,-event.accelerationIncludingGravity.y/10));
   }
 }
 
