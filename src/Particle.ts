@@ -4,34 +4,32 @@ import Vec2D from "./Vec2D"
 export default class Particle {
   static canvas = document.getElementById('foreground-canvas') as HTMLCanvasElement;
 
-  public currentPosition: Vec2D;
-  public previousPosition: Vec2D;
+  public position: Vec2D;
   public acceleration: Vec2D;
+  public velocity: Vec2D;
   public radius: number;
   public color: { r: number, g: number, b: number };
   private grid: Grid;
   private cell: Vec2D;
 
-  constructor(pos: Vec2D, radius: number, acc: Vec2D, color: { r: number, g: number, b: number }, grid: Grid) {
-    this.currentPosition = pos;
-    this.previousPosition = this.currentPosition;
+  constructor(pos: Vec2D, radius: number, velocity: Vec2D, color: { r: number, g: number, b: number }, grid: Grid) {
+    this.position = pos;
+    this.velocity = velocity;
+    this.acceleration = new Vec2D(0,0);
     this.radius = radius;
-    this.acceleration = acc;
     this.color = color;
     this.grid = grid;
-    this.cell = new Vec2D(Math.floor(this.currentPosition.x / grid.pixelSize), Math.floor(this.currentPosition.y / grid.pixelSize));
+    this.cell = new Vec2D(Math.floor(this.position.x / grid.pixelSize), Math.floor(this.position.y / grid.pixelSize));
   }
 
   updatePosition(dt: number) {
-    let velocity: Vec2D = new Vec2D(this.currentPosition.x - this.previousPosition.x, this.currentPosition.y - this.previousPosition.y);
-    this.previousPosition = this.currentPosition.clone();
+    // let velocity: Vec2D = new Vec2D(this.currentPosition.x - this.previousPosition.x, this.currentPosition.y - this.previousPosition.y);
 
-    this.currentPosition.add(velocity);
-    this.acceleration.multiply(dt * dt);
-    this.currentPosition.add(this.acceleration);
+    this.position.add(this.velocity.add(this.acceleration.multiply((dt * dt) / 2)));
 
     this.acceleration.x = 0;
     this.acceleration.y = 0;
+
     this.updateCell();
   }
 
@@ -54,7 +52,7 @@ export default class Particle {
   }
   
   updateCell(){
-    this.cell = new Vec2D(Math.floor(this.currentPosition.x / this.grid.pixelSize), Math.floor(this.currentPosition.y / this.grid.pixelSize));
+    this.cell = new Vec2D(Math.floor(this.position.x / this.grid.pixelSize), Math.floor(this.position.y / this.grid.pixelSize));
   }
 
 

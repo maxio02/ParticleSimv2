@@ -41,8 +41,8 @@ export class Grid {
     }
 
     public put(particle: Particle): void {
-        const column = Math.floor(particle.currentPosition.x / this.pixelSize);
-        const row = Math.floor(particle.currentPosition.y / this.pixelSize);
+        const column = Math.floor(particle.position.x / this.pixelSize);
+        const row = Math.floor(particle.position.y / this.pixelSize);
         
         if (column >= 0 && column < this.cells.length && row >= 0 && row < this.cells[column].length) {
             this.cells[column][row].push(particle);

@@ -57,4 +57,8 @@ export default class Vec2D {
       return new Vec2D(this.x - other.x, this.y - other.y)
     }
 
+    squaredDistanceTo(other:Vec2D){
+      return (this.x - other.x)**2 + (this.y - other.y)**2;
+    }
+
 }

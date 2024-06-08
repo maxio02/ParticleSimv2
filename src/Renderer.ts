@@ -88,7 +88,7 @@ export function drawParticles() {
   // Draw the rectangle.
   particles.forEach((particle) => {
       gl.uniform2fv(resolutionUniformLocation, resolution);
-      gl.uniform2f(translationLocation, particle.currentPosition.x, particle.currentPosition.y);
+      gl.uniform2f(translationLocation, particle.position.x, particle.position.y);
       gl.uniform3f(colorUniformLocation, particle.color.r,particle.color.g, particle.color.b);
       gl.uniform1f(radiusUniformLocation, particle.radius)
       gl.uniform1f(outlineUniformLocation, outlineColor);
@@ -107,7 +107,7 @@ function drawAttractors(attractors: Attractor[]) {
 export function drawDottedLine(from: Vec2D, to: Vec2D, radius: number = 5, dotCount: number = 8) {
   if (inputHandler.clicked && from.x != to.x && from.y != to.y) {
     const distance = from.difference(to);
-    drawPredictedPath(from.clone(), distance.clone())
+    drawPredictedPath(from.clone(), distance.clone().multiply(0.05))
     distance.divide(dotCount);
     var angle = Math.atan2(to.y - from.y, to.x - from.x);
     var new_to = new Vec2D(to.x, to.y);
@@ -134,7 +134,7 @@ export function drawPredictedPath(startPos: Vec2D, AccelerationVector: Vec2D) {
     applyAttractorForces(predictedDot);
     predictedDot.updatePosition(getAverageFrameTime()/20);
     if (i % 3 == 0) {
-      drawDot(predictedDot.currentPosition.x, predictedDot.currentPosition.y, 5, 255 - i*2)
+      drawDot(predictedDot.position.x, predictedDot.position.y, 5, 255 - i*2)
     }
 
   }

@@ -164,7 +164,6 @@ canvas{
     top: 0;
     margin: 15;
     align-items: center;
-
     box-shadow: 0px 0px 15px var(--text-color);
 
     transition-duration: 0.4s;
@@ -180,10 +179,12 @@ canvas{
 
 #switch-icon-sun {
   fill: var(--theme-switch-icon-color-sun);
+  top: 8px
 }
 
 #switch-icon-moon {
   fill: var(--theme-switch-icon-color-moon);
+  top: 8px
 }
 
 #switch-icon-sun,
