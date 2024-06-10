@@ -26,6 +26,7 @@ export class Grid {
                 cells[i][j] = [];
             }
         }
+        this.cells  = cells;
         return cells;
     }
 
