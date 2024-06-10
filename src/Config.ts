@@ -3,9 +3,9 @@ import Vec2D from "./Vec2D";
 
 var fieldStrength = 10;
 var physicsSubstepsAmount = 4;
-var gravityDirection = new Vec2D(0, 1.3);
-var fieldSize = 100;
-var particleNumber = 200;
+var gravityDirection = new Vec2D(0, 1.2);
+var fieldSize = 250;
+var particleNumber = 400;
 var pointerFunction: PointerFunctionType = 'field';
 var gridSize = 26;
 var gyroEnabled = false;

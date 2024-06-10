@@ -132,7 +132,7 @@ export function drawPredictedPath(startPos: Vec2D, AccelerationVector: Vec2D) {
     predictedDot.accelerate(Config.getGravityDirection());
     applyConstraint(predictedDot);
     applyAttractorForces(predictedDot);
-    predictedDot.updatePosition(getAverageFrameTime()/20);
+    predictedDot.updatePosition(0.5);
     if (i % 3 == 0) {
       drawDot(predictedDot.position.x, predictedDot.position.y, 5, 255 - i*2)
     }

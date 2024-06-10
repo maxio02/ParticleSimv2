@@ -121,9 +121,9 @@ particlesAmountEntryBox.addEventListener('change', function () {
 
 function handleMotion(event: DeviceMotionEvent): void {
   if(Config.isGyroEnabled()){
-  Config.setGravityDirection(new Vec2D(event.accelerationIncludingGravity.x/5,-event.accelerationIncludingGravity.y/5));
+  Config.setGravityDirection(new Vec2D(-event.accelerationIncludingGravity.x/5,event.accelerationIncludingGravity.y/5));
   } else{
-    Config.setGravityDirection(new Vec2D(0, 1.3));
+    Config.setGravityDirection(new Vec2D(0, 1.2));
   }
 }
 

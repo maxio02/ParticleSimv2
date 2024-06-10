@@ -27,6 +27,11 @@ function updatePositions(dt: number) {
       particle.accelerate(acc)
     });
   }
+  function applyVelocity(vel: Vec2D){
+    particles.forEach((particle) => {
+      particle.velocity.add(vel)
+    });
+  }
 
   function moveAllParticles(vec: Vec2D){
     particles.forEach((particle) => {
@@ -79,8 +84,9 @@ function updatePositions(dt: number) {
       const deltaX = window.screenX - previousScreenX;
       const deltaY = window.screenY - previousScreenY;
       const screenVelocity = new Vec2D(-deltaX, -deltaY);
-      if (deltaX != 0 || deltaY != 0){
-        moveAllParticles(screenVelocity);
+      if (deltaX != 0 || deltaY != 0 ){
+         moveAllParticles(screenVelocity);
+        //applyVelocity(screenVelocity.multiply(0.1));
       }
       
 
@@ -235,7 +241,7 @@ function solveCollisions() {
       radiiSum = particle1.radius + particle2.radius;
       squaredRadiiSum = radiiSum * radiiSum;
 
-      if (squaredDistance < squaredRadiiSum) {
+      if (squaredDistance < squaredRadiiSum && squaredDistance != 0) {
         numberOfCollisions++;
         
           let distance = Math.sqrt(squaredDistance);
@@ -246,7 +252,7 @@ function solveCollisions() {
       
           particle1.position.add(tempCollisionDirection);
           particle2.position.subtract(tempCollisionDirection);
-
+          tempCollisionDirection.multiply(6)
           particle1.velocity.add(tempCollisionDirection).add(new Vec2D ((1 - Math.random()*2)/1000, (1 - Math.random()*2)/1000));
           particle2.velocity.subtract(tempCollisionDirection).add(new Vec2D ((1 - Math.random()*2)/1000, (1 - Math.random()*2)/1000));
       }
@@ -254,3 +260,4 @@ function solveCollisions() {
   });
   // console.log(numberOfCollisions);
 }
+
