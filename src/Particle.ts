@@ -25,7 +25,19 @@ export default class Particle {
   updatePosition(dt: number) {
     // let velocity: Vec2D = new Vec2D(this.currentPosition.x - this.previousPosition.x, this.currentPosition.y - this.previousPosition.y);
 
-    this.position.add(this.velocity.add(this.acceleration.multiply((dt * dt) / 2)));
+    //let sq = this.velocity.squaredLength()
+    // let drag = this.velocity.clone().multiply(-1 * sq * 0.0000005)
+    // this.velocity.add(drag)
+
+
+    let moveDelta = this.velocity.add(this.acceleration.multiply((dt))).clone()
+    
+    moveDelta.multiply(dt)
+
+    
+
+
+    this.position.add(moveDelta);
 
     this.acceleration.x = 0;
     this.acceleration.y = 0;

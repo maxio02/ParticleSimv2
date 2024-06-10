@@ -6,7 +6,7 @@ import Vec2D from './Vec2D';
 import { attractors, grid, particles } from './script';
 
 const inputHandler = InputHandler.getInstance();
-let previousScreenX= 0, previousScreenY = 0
+let previousScreenX= 0, previousScreenY = 0, previousVelocity = new Vec2D(0,0)
 function updatePositions(dt: number) {
     grid.removeAll();
     particles.forEach((particle) => {
@@ -22,15 +22,21 @@ function updatePositions(dt: number) {
     });
   }
 
-  function applyVelocity(vel: Vec2D){
+  function applyAcceleration(acc: Vec2D){
     particles.forEach((particle) => {
-      particle.velocity.add(vel)
+      particle.accelerate(acc)
+    });
+  }
+
+  function moveAllParticles(vec: Vec2D){
+    particles.forEach((particle) => {
+      particle.position.add(vec);
     });
   }
   
   function applyField(fieldPos: Vec2D) {
     particles.forEach((particle) => {
-      const pullDirection = fieldPos.difference(particle.position)
+      const pullDirection = fieldPos.difference(particle.position);
       const distance = pullDirection.length();
   
       if (distance < Config.getFieldSize() && distance > 10) {
@@ -72,9 +78,11 @@ function updatePositions(dt: number) {
 
       const deltaX = window.screenX - previousScreenX;
       const deltaY = window.screenY - previousScreenY;
-      const screenVelocity = new Vec2D(-deltaX / 60, -deltaY / 60);
-
-      applyVelocity(screenVelocity);
+      const screenVelocity = new Vec2D(-deltaX, -deltaY);
+      if (deltaX != 0 || deltaY != 0){
+        moveAllParticles(screenVelocity);
+      }
+      
 
       previousScreenX = window.screenX;
       previousScreenY = window.screenY;
@@ -119,34 +127,29 @@ function updatePositions(dt: number) {
 
   export function applyConstraint(particle: Particle) {
     // Apply floor constraint
-    if (particle.position.y + particle.radius > foregroundCanvas.height) {
-      particle.velocity = new Vec2D(particle.velocity.x, -Math.abs(particle.velocity.y)).multiply(0.5)
+    if (particle.position.y + particle.radius >= foregroundCanvas.height) {
+      particle.velocity = new Vec2D(particle.velocity.x* 0.992, -Math.abs(particle.velocity.y * 0.6))
       particle.position.y = foregroundCanvas.height - particle.radius;
-      // particle.previousPosition.y = particle.currentPosition.y + particle.currentPosition.y - particle.previousPosition.y;
-      // particle.accelerate(new Vec2D(0, -(foregroundCanvas.height - particle.radius)/10))
 
     }
   
     // Apply Ceiling constraint
-    if (particle.position.y - particle.radius < 0) {
+    if (particle.position.y - particle.radius <= 0) {
       particle.position.y = particle.radius;
-      particle.velocity = new Vec2D(particle.velocity.x, Math.abs(particle.velocity.y)).multiply(0.5);
-      // particle.previousPosition.y = particle.currentPosition.y + particle.currentPosition.y - particle.previousPosition.y;
+      particle.velocity = new Vec2D(particle.velocity.x, Math.abs(particle.velocity.y * 0.6))
     }
   
   
     // Apply left wall constraint
-    if (particle.position.x - particle.radius < 0) {
+    if (particle.position.x - particle.radius <= 0) {
       particle.position.x = particle.radius;
-      particle.velocity = new Vec2D(Math.abs(particle.velocity.x), particle.velocity.y).multiply(0.5);
-      // particle.previousPosition.x = particle.currentPosition.x + particle.currentPosition.x - particle.previousPosition.x;
+      particle.velocity = new Vec2D(Math.abs(particle.velocity.x * 0.6), particle.velocity.y)
     }
   
     // Apply right wall constraint
-    if (particle.position.x + particle.radius > foregroundCanvas.width) {
-      particle.velocity = new Vec2D(-Math.abs(particle.velocity.x), particle.velocity.y).multiply(0.5);
+    if (particle.position.x + particle.radius >= foregroundCanvas.width) {
+      particle.velocity = new Vec2D(-Math.abs(particle.velocity.x * 0.6), particle.velocity.y)
       particle.position.x = foregroundCanvas.width - particle.radius;
-      // particle.accelerate(new Vec2D(-(foregroundCanvas.width - particle.radius)/10,0))
     }
   }
 
@@ -163,7 +166,7 @@ function updatePositions(dt: number) {
     });
   }
   
-  function solveCollisions() {
+  function solveCollisions2() {
     particles.forEach((particle1) => {
         const neighboringParticles = particle1.getNeighboringParticles();
         neighboringParticles.forEach((particle2) => {
@@ -212,4 +215,42 @@ function updatePositions(dt: number) {
     // console.log(numberOfCollisions);
 }
 
-  
+function solveCollisions() {
+  var numberOfCollisions = 0;
+
+
+  let tempCollisionDirection = new Vec2D(0, 0);
+  let squaredDistance = 0;
+  let radiiSum = 0;
+  let squaredRadiiSum = 0;
+
+  particles.forEach((particle1) => {
+    const neighboringParticles = particle1.getNeighboringParticles();
+    neighboringParticles.forEach((particle2) => {
+      if (particle1 === particle2) return;
+
+      tempCollisionDirection.set(particle1.position).subtract(particle2.position);
+      squaredDistance = tempCollisionDirection.squaredLength();
+      
+      radiiSum = particle1.radius + particle2.radius;
+      squaredRadiiSum = radiiSum * radiiSum;
+
+      if (squaredDistance < squaredRadiiSum) {
+        numberOfCollisions++;
+        
+          let distance = Math.sqrt(squaredDistance);
+          tempCollisionDirection.divide(distance);
+      
+          let delta = radiiSum - distance;
+          tempCollisionDirection.multiply(delta * 0.5);
+      
+          particle1.position.add(tempCollisionDirection);
+          particle2.position.subtract(tempCollisionDirection);
+
+          particle1.velocity.add(tempCollisionDirection).add(new Vec2D ((1 - Math.random()*2)/1000, (1 - Math.random()*2)/1000));
+          particle2.velocity.subtract(tempCollisionDirection).add(new Vec2D ((1 - Math.random()*2)/1000, (1 - Math.random()*2)/1000));
+      }
+    });
+  });
+  // console.log(numberOfCollisions);
+}

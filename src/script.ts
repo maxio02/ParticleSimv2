@@ -26,13 +26,12 @@ function animate() {
   // drawAttractors();
   updateUI();
 
-  const mult = 10 /frameTime;
   if (frameCount % 3 === 0 && particles.length < Config.getParticleNumber() && frameCount > 120) {
-    particles.push(new Particle(new Vec2D(200, 200), grid.pixelSize/2, new Vec2D(2 * mult, -0.8 * mult), getRandomColor(), grid));
-    particles.push(new Particle(new Vec2D(200, 260), grid.pixelSize/2, new Vec2D(1.8 * mult, -0.8 * mult), getRandomColor(), grid));
-    particles.push(new Particle(new Vec2D(200, 320), grid.pixelSize/2, new Vec2D(1.7 * mult, -0.8 * mult), getRandomColor(), grid));
-    particles.push(new Particle(new Vec2D(200, 380), grid.pixelSize/2, new Vec2D(1.8 * mult, -0.8 * mult), getRandomColor(), grid));
-    particles.push(new Particle(new Vec2D(200, 440), grid.pixelSize/2, new Vec2D(1.7 * mult, -0.8 * mult), getRandomColor(), grid));
+    particles.push(new Particle(new Vec2D(200, 200), grid.pixelSize/2, new Vec2D(27 , -12), getRandomColor(), grid));
+    particles.push(new Particle(new Vec2D(200, 260), grid.pixelSize/2, new Vec2D(29 , -12), getRandomColor(), grid));
+    particles.push(new Particle(new Vec2D(200, 320), grid.pixelSize/2, new Vec2D(24 , -12), getRandomColor(), grid));
+    particles.push(new Particle(new Vec2D(200, 380), grid.pixelSize/2, new Vec2D(25 , -12), getRandomColor(), grid));
+    particles.push(new Particle(new Vec2D(200, 440), grid.pixelSize/2, new Vec2D(24, -12 ), getRandomColor(), grid));
     setGeometry();
   }
   frameCount++;

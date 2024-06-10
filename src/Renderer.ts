@@ -107,7 +107,7 @@ function drawAttractors(attractors: Attractor[]) {
 export function drawDottedLine(from: Vec2D, to: Vec2D, radius: number = 5, dotCount: number = 8) {
   if (inputHandler.clicked && from.x != to.x && from.y != to.y) {
     const distance = from.difference(to);
-    drawPredictedPath(from.clone(), distance.clone().multiply(0.05))
+    drawPredictedPath(from.clone(), distance.clone().multiply(0.1))
     distance.divide(dotCount);
     var angle = Math.atan2(to.y - from.y, to.x - from.x);
     var new_to = new Vec2D(to.x, to.y);
