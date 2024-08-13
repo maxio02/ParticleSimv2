@@ -28,7 +28,7 @@ export class InputHandler {
   }
 
   private initializeEventListeners(): void {
-    const main_body = document.getElementById('main_container');
+    const main_body = document.getElementById('background');
     if (!main_body) return;
 
     main_body.addEventListener("mousedown", this.handleMouseDown.bind(this));

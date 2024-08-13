@@ -42,28 +42,7 @@ div#background {
     width: 100%;
     height: 100%;
     position: fixed;
-    z-index: -3;
 }
-
-div#background #light-theme{
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  z-index: -3;
-}
-
-div#background #dark-theme{
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  z-index: -3;
-}
-
-
 
 canvas{
     width: 100%;
@@ -80,13 +59,14 @@ canvas{
         transform 0.4s ease-in-out,
         width 0.3s ease-in-out,
         height 0.3s ease-in-out,
-        border-radius 0.3s ease-in-out;
+        border-radius 0.3s ease-in-out,
+        padding 0.3s ease-in-out;
   transition-duration: 0.4s;
 }
 
 #menu-button[open = "false"] {
     border: none;
-    padding: 10px 20px;
+    padding: 0px 15px 10px 10px;
     text-decoration: none; 
     display: inline-block; 
     font-size: 16px;
@@ -112,19 +92,22 @@ canvas{
   }
 
   #menu-back-button{
+    transition:
+        transform 0.4s ease-in-out;
     fill: white;
     height: 26px;
     width: 26px;
     position: relative !important;
     left: 0px !important;
     display: inline-block;
+    top: 5px;
+    
   }
 
   #back-arrow{
     height: inherit;
     width: inherit;
-    margin-top: 0px;
-
+    fill: var(--menu-text-color);
   }
   #menu-button:hover[open = "false"] {
     background-color: #5e5e5e;
@@ -214,6 +197,9 @@ canvas{
   .slider::-webkit-slider-thumb {
     margin-top: -4px;
     cursor: pointer;
+  }
+  .slider::-moz-range-progress{
+    background-color: #5e5e5e;
   }
 
   .entry-container {

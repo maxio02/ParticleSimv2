@@ -27,7 +27,8 @@ export function openMenu() {
   if (menuButton.getAttribute("open") == "false") {
     menuButton.setAttribute("open", "true");
     menuButton.style.cursor = "auto";
-
+    const menuBackButton = menuButton.querySelector('#menu-back-button') as HTMLDivElement;
+    menuBackButton.style.transform = "rotate(180deg)";
     menuElements.forEach(element => {
       setTimeout(function () {
         element.style.display = "block";
@@ -43,6 +44,8 @@ export function openMenu() {
 export function closeMenu() {
   menuButton.setAttribute("open", "false");
   menuButton.style.cursor = "pointer";
+  const menuBackButton = menuButton.querySelector('#menu-back-button') as HTMLDivElement;
+  menuBackButton.style.transform = "rotate(0deg)";
   menuElements.forEach(element => {
     element.style.display = "none";
   });
